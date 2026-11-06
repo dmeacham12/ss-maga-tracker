@@ -57,23 +57,5 @@
     ],
     "addedBy": "manual",
     "addedAt": "2026-11-05T18:00:00Z"
-  },
-  {
-    "id": "person-2026-11-05",
-    "date": "2026-11-05",
-    "name": "Test Person",
-    "role": "Test Role",
-    "kind": "Resigned",
-    "group": "Administration",
-    "status": "confirmed",
-    "summary": "",
-    "sources": [
-      {
-        "name": "Fixture News",
-        "url": "https://example.com/fixture/deputy-resigns"
-      }
-    ],
-    "addedBy": "updater",
-    "addedAt": "2026-11-06T02:51:11.781Z"
   }
 ]
