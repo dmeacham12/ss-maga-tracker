@@ -16,24 +16,45 @@ export function hash(str) {
 }
 const pick = (arr, h, shift) => arr[((h >>> shift) & 0xffff) % arr.length];
 
-const SKIN = ["#f4d6bb", "#e6b48c", "#c58a62", "#94613f", "#65432c"];
+import { FIGURES, HAIR_STYLES, SKIN_TONE_COUNT } from "../config.js";
+
+export const SKIN = ["#f6dcc4", "#ebc09a", "#d39b6f", "#b07848", "#85563a", "#5a3a28"]; // tones 1..6
 const HAIR = ["#2a2018", "#5d4128", "#b98d4e", "#9a9a9a", "#171717", "#7d351b"];
+const HAIR_MID = ["#2a2018", "#5d4128", "#9a9a9a", "#171717", "#3a2a1c"];  // no blond or red on mid tones
+const HAIR_DEEP = ["#171717", "#2a2018", "#3a2a1c", "#9a9a9a"];             // dark or gray on deep tones
 const CLOTH = ["#33506b", "#5a3c5e", "#2f6a58", "#8a4a3b", "#3c3c4a", "#6b7b91", "#a55868", "#bf9a42", "#3b6ea5", "#76593b"];
 const TIES = ["#c8423a", "#2d5f9a", "#e0b43a", "#3f8a6b", "#7a3a8a"];
 
-export function look(id) {
+// Outfit numbers: 0 suit and tie, 1 blazer and skirt, 2 dress, 3 casual.
+const POOLS = {
+  woman: { outfits: [1, 2], styles: [1, 3, 5, 6, 4] },
+  man: { outfits: [0, 0, 3], styles: [0, 4, 2, 7, 6] },
+};
+
+/**
+ * Appearance for an entry. `opt` is optional: { figure: "woman" | "man" | "neutral", skin: 1-6, hair: name }.
+ * Whatever it leaves out is chosen from a hash of the id, so figures never depend on who someone is.
+ */
+export function look(id, opt = {}) {
   const h = hash(id);
+  const fig = FIGURES.includes(opt.figure) ? opt.figure : "neutral";
+  const pool = POOLS[fig];
+  const tone = Number(opt.skin);
+  const skinIdx = Number.isInteger(tone) && tone >= 1 && tone <= SKIN_TONE_COUNT ? tone - 1 : (h & 0xffff) % SKIN.length;
+  let style = pool ? pool.styles[(h >>> 12) % pool.styles.length] : (h >>> 12) % 5;
+  const named = HAIR_STYLES.indexOf(opt.hair);
+  if (named >= 0) style = named;
   return {
-    skin: pick(SKIN, h, 0), hair: pick(HAIR, h, 3), cloth: pick(CLOTH, h, 6), tie: pick(TIES, h, 9),
-    style: (h >>> 12) % 5, outfit: (h >>> 15) % 4,
+    skin: SKIN[skinIdx], hair: pick(skinIdx >= 4 ? HAIR_DEEP : skinIdx >= 2 ? HAIR_MID : HAIR, h, 3), cloth: pick(CLOTH, h, 6), tie: pick(TIES, h, 9),
+    style, outfit: pool ? pool.outfits[(h >>> 15) % pool.outfits.length] : (h >>> 15) % 4,
     bw: 0.88 + ((h >>> 18) % 28) / 100, bh: 0.93 + ((h >>> 22) % 16) / 100,
     pants: pick(["#26313d", "#3a3f4a", "#2c3a4d", "#4a3b34"], h, 25),
   };
 }
 
 /** Build one figure. Feet at (0,0), height about 40 units. Returns refs for posing. */
-export function makeFigure(id, parent) {
-  const L = look(id);
+export function makeFigure(id, parent, opt) {
+  const L = look(id, opt);
   const root = sv("g", {}, parent);
   const body = sv("g", {}, root);
   const legs = sv("g", {}, body);
@@ -74,6 +95,12 @@ export function makeFigure(id, parent) {
   else if (hs === 1) sv("path", { d: "M-6.2,-35 Q-7,-45 0,-44.4 Q7,-45 6.2,-35 L6.4,-27 Q4,-30 4.4,-37 Q0,-41 -4.4,-37 Q-4,-30 -6.4,-27 Z", fill: L.hair }, upper);
   else if (hs === 3) { sv("circle", { cx: -1, cy: -45, r: 3.4, fill: L.hair }, upper); sv("path", { d: "M-5.8,-37 Q-5.6,-43.6 0,-43.2 Q5.6,-43.6 5.8,-37 Q0,-41.6 -5.8,-37 Z", fill: L.hair }, upper); }
   else if (hs === 4) sv("path", { d: "M-5.8,-37 Q-5,-44.4 1,-43.8 Q6,-43 5.8,-37 Q3,-41 -1,-40.6 Q-4,-40 -5.8,-37 Z", fill: L.hair }, upper);
+  else if (hs === 5) sv("path", { d: "M-6.4,-35 Q-7.2,-45.2 0,-44.8 Q7.2,-45.2 6.4,-35 L6.6,-31.4 Q4.8,-31.4 4.4,-37 Q0,-41 -4.4,-37 Q-4.8,-31.4 -6.6,-31.4 Z", fill: L.hair }, upper);
+  else if (hs === 6) { // natural curls
+    for (const [cx, cy, r] of [[-5.2, -40.4, 3.3], [-2.4, -43.6, 3.5], [1.8, -44, 3.5], [5, -41, 3.3], [6.2, -37.4, 2.6], [-6.4, -37, 2.6]])
+      sv("circle", { cx, cy, r, fill: L.hair }, upper);
+    sv("path", { d: "M-5.2,-37 Q-4.6,-41.6 0,-41.4 Q4.6,-41.6 5.2,-37 Q0,-40 -5.2,-37 Z", fill: L.hair }, upper);
+  } else if (hs === 7) sv("path", { d: "M-5.6,-37.5 Q-5.6,-42.8 0,-42.6 Q5.6,-42.8 5.6,-37.5 Q2,-40.2 0,-40.2 Q-2,-40.2 -5.6,-37.5 Z", fill: L.hair, opacity: 0.88 }, upper);
   // style 2: bald, no hair
   sv("circle", { cx: 2.4, cy: -37, r: 0.7, fill: "#1b1f24" }, upper); // eye (faces +x)
 

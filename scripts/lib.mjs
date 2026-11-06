@@ -122,11 +122,15 @@ export function buildIssue(cand, entries) {
     "kind: Resigned",
     "group: Administration",
     "summary:",
+    "figure:",
+    "skin:",
+    "hair:",
     "```", "",
     `<!-- candidate-source: ${lead.outlet.replace(/-->/g, "")} | ${lead.url} -->`,
     "",
     "Edit the block above, then add the label `jumped` (confirmed), `rumor`, or `dismiss`.",
     `Valid kinds: ${C.KINDS.join(", ")}. Groups: ${C.GROUPS.join(", ")}.`,
+    `Optional look for the figure (see gallery.html): figure ${C.FIGURES.join("/")}, skin 1-${C.SKIN_TONE_COUNT}, hair ${C.HAIR_STYLES.join("/")}.`,
   );
   return { title: trimTitle(lead.title), body: lines.join("\n") };
 }
@@ -141,7 +145,7 @@ export function buildOverflow(extra) {
 }
 
 // ---------- parsing an issue (candidate block or issue form) ----------
-const FORM_FIELDS = { "name": "name", "role": "role", "date": "date", "kind": "kind", "group": "group", "status": "status", "source url": "sourceUrl", "source name": "sourceName", "summary": "summary", "type": "type", "denied": "denied", "quip": "quip" };
+const FORM_FIELDS = { "name": "name", "role": "role", "date": "date", "kind": "kind", "group": "group", "status": "status", "source url": "sourceUrl", "source name": "sourceName", "summary": "summary", "type": "type", "denied": "denied", "quip": "quip", "figure": "figure", "skin tone": "skin", "hair": "hair" };
 
 export function parseIssue(body) {
   const text = String(body || "").replace(/\r\n/g, "\n");
@@ -158,7 +162,7 @@ export function parseIssue(body) {
     const fence = text.match(/```[a-z]*\n([\s\S]*?)```/);
     const src = fence ? fence[1] : text;
     for (const line of src.split("\n")) {
-      const m = line.match(/^\s*(name|role|date|kind|group|summary|type|status|denied|quip)\s*:\s*(.*)$/i);
+      const m = line.match(/^\s*(name|role|date|kind|group|summary|type|status|denied|quip|figure|skin|hair)\s*:\s*(.*)$/i);
       if (m && m[2].trim()) f[m[1].toLowerCase()] = clean(m[2], 400);
     }
     const s = text.match(/<!--\s*candidate-source:\s*(.*?)\s*\|\s*(\S+)\s*-->/);
@@ -214,10 +218,17 @@ export function applyAction(ctx) {
   const sources = [];
   if (source) sources.push(source);
   if (ctx.issueUrl && !source && f.fromForm) { /* form without a source URL: nothing to add */ }
+  // optional figure appearance; anything invalid or "random" is simply ignored
+  const looks = {};
+  const fig = ci(C.FIGURES, f.figure), hair = ci(C.HAIR_STYLES, f.hair), tone = Number(f.skin);
+  if (fig) looks.figure = fig;
+  if (Number.isInteger(tone) && tone >= 1 && tone <= C.SKIN_TONE_COUNT) looks.skin = tone;
+  if (hair) looks.hair = hair;
   const existing = entries.find(e => e.name.toLowerCase() === name.toLowerCase());
   let entry, verb;
   if (existing) {
     entry = existing;
+    Object.assign(entry, looks);
     for (const s of sources) if (!entry.sources.some(x => x.url === s.url)) entry.sources.push(s);
     if (wantStatus === "confirmed" && entry.status !== "confirmed") {
       Object.assign(entry, { status: "confirmed", date, kind });
@@ -233,6 +244,7 @@ export function applyAction(ctx) {
     entry = { id, date, name, role: clean(f.role, 160), kind, group, status: wantStatus, summary: clean(f.summary, 300), sources, addedBy: f.candidate ? "updater" : "manual", addedAt: now };
     if (wantStatus === "rumor" && /^(y|true|1)/i.test(f.denied || "")) entry.denied = true;
     if (f.quip) entry.quip = clean(f.quip, 140);
+    Object.assign(entry, looks);
     entries.push(entry);
     verb = "added";
   }

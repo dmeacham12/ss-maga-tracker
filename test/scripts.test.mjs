@@ -80,4 +80,22 @@ const pr = dr.entries.find(e => e.name === "Pat Rumor");
 assert.equal(pr.denied, true);
 assert.equal(pr.quip, "Spotted near the lifeboats.");
 assert.equal(read("../data/entries.json").find(e => e.name === "Marco Rubio").denied, true);
+// --- figure appearance ---
+import { look, SKIN } from "../src/figures.js";
+const looked = applyAction({ ...base, body: "```\nname: Pat Looks\ndate: 2026-11-05\nkind: Fired\ngroup: Congress\nfigure: Woman\nskin: 5\nhair: curly\n```" });
+const pl = looked.entries.find(e => e.name === "Pat Looks");
+assert.deepEqual([pl.figure, pl.skin, pl.hair], ["woman", 5, "curly"]);
+const junk = applyAction({ ...base, body: "```\nname: Pat Junk\ndate: 2026-11-05\nkind: Fired\ngroup: Congress\nfigure: robot\nskin: 9\nhair: random\n```" });
+const pj = junk.entries.find(e => e.name === "Pat Junk");
+assert.ok(!("figure" in pj) && !("skin" in pj) && !("hair" in pj), "invalid or random values are dropped");
+const formLook = applyAction({ ...base, body: "### Name\n\nForm Look\n\n### Date\n\n2026-11-08\n\n### Kind\n\nFired\n\n### Group\n\nCongress\n\n### Status\n\nconfirmed\n\n### Figure\n\nman\n\n### Skin tone\n\n2\n\n### Hair\n\nrandom\n" });
+const fl = formLook.entries.find(e => e.name === "Form Look");
+assert.deepEqual([fl.figure, fl.skin, fl.hair], ["man", 2, undefined]);
+// the figure builder honors the fields and falls back to random
+assert.equal(look("x", { skin: 6 }).skin, SKIN[5]);
+assert.equal(look("x", { hair: "bald" }).style, 2);
+assert.ok([1, 2].includes(look("any-id", { figure: "woman" }).outfit));
+assert.ok([0, 3].includes(look("any-id", { figure: "man" }).outfit));
+assert.deepEqual(look("same", {}), look("same"), "no options = same stable random look");
+for (const e of read("../data/entries.json")) assert.ok(!e.figure || ["woman", "man", "neutral"].includes(e.figure), e.name);
 console.log("scripts ok");

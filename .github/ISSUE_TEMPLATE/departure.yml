@@ -68,3 +68,41 @@ body:
     attributes:
       label: Summary
       description: One sentence in your own words. Do not paste headline or article text.
+  - type: dropdown
+    id: figure
+    attributes:
+      label: Figure
+      description: "Optional. Which generic figure to draw. random lets the site pick."
+      options:
+        - random
+        - woman
+        - man
+        - neutral
+  - type: dropdown
+    id: skin
+    attributes:
+      label: Skin tone
+      description: "Optional. 1 is lightest, 6 is deepest. See gallery.html on the site."
+      options:
+        - random
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - "6"
+  - type: dropdown
+    id: hair
+    attributes:
+      label: Hair
+      description: "Optional. random lets the site pick a style that fits the figure."
+      options:
+        - random
+        - short
+        - long
+        - bald
+        - bun
+        - side
+        - bob
+        - curly
+        - buzz

@@ -368,7 +368,7 @@ export function createScene(svg, opts = {}) {
     people.forEach((p, i) => {
       p.rumor = p.e.status === "rumor";
       p.h = hash(p.e.id);
-      p.fig = makeFigure(p.e.id, figLayer);
+      p.fig = makeFigure(p.e.id, figLayer, p.e);
       p.tag = makeTag(p.e.name, p.rumor, p.rumor && p.e.denied);
       p.row = i % 3;
       if (p.rumor) { p.slot = FORWARD[ri % FORWARD.length] - Math.floor(ri / FORWARD.length) * 9; ri++; }

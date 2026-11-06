@@ -51,3 +51,10 @@ export const SCOPE_REGEX_SOURCE = "\(R-[A-Za-z.]+\)";
 
 export const MAX_ISSUES_PER_RUN = 5;
 export const CLUSTER_HOURS = 24;
+
+// ---- Figure appearance (all optional per entry; set by you, never guessed from a name) ----
+// "figure" picks the outfit and hairstyle pool, "skin" is a tone from 1 (lightest) to 6 (deepest),
+// "hair" overrides the hairstyle. Anything left out is chosen at random from the entry id.
+export const FIGURES = ["woman", "man", "neutral"];
+export const SKIN_TONE_COUNT = 6;
+export const HAIR_STYLES = ["short", "long", "bald", "bun", "side", "bob", "curly", "buzz"]; // order = drawing index

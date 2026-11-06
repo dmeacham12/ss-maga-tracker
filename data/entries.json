@@ -7,6 +7,7 @@
     "kind": "Stepped down",
     "group": "Congress",
     "status": "confirmed",
+    "figure": "man",
     "summary": "Won't run for House GOP leader after the midterm losses, but stays in Congress.",
     "sources": [
       {
@@ -29,6 +30,7 @@
     "kind": "Resigned",
     "group": "Administration",
     "status": "confirmed",
+    "figure": "woman",
     "summary": "First post-midterm exit from the administration; her resignation was accepted.",
     "sources": [
       {
@@ -47,6 +49,7 @@
     "kind": "Rumored exit",
     "group": "Administration",
     "status": "rumor",
+    "figure": "man",
     "denied": true,
     "summary": "One outlet says he is preparing to leave for a 2028 run; the White House and State Department call it baseless.",
     "sources": [

@@ -38,6 +38,18 @@ Pick whichever is easiest.
 
 Write `summary` yourself. Do not paste headline or article text; the site only shows the outlet name and link.
 
+## How each figure looks
+
+Figures are generic stand-ins. By default each one's look is picked at random from its id. You can set three optional fields on any entry to make a figure fit the person; nothing is ever guessed from a name.
+
+```json
+"figure": "woman",   // woman, man, or neutral: picks the outfit and hairstyle pool
+"skin": 4,           // 1 (lightest) to 6 (deepest)
+"hair": "curly"      // short, long, bald, bun, side, bob, curly, or buzz
+```
+
+Open `gallery.html` on the site (for example `https://dmeacham12.github.io/ss-maga-tracker/gallery.html`) to see every option. In a candidate issue, add `figure:`, `skin:` and `hair:` lines to the block. The Departure form has the same three dropdowns, and `random` leaves the choice to the site. Hair color is picked to suit the skin tone.
+
 ## The jokes
 
 Everything funny is aimed at the ship and the situation, never at a person. Figures are generic, and which jump style someone gets (swan dive, cannonball, backflip, belly flop, briefcase plunge) and their judges' scores come from a hash of the entry id, so they are pure randomness.
@@ -96,7 +108,7 @@ The workflows use only the default `GITHUB_TOKEN`; no other secrets are needed. 
 ## Repo layout
 
 ```
-index.html
+index.html, gallery.html
 assets/        favicon
 src/           model.js (timeline + sinking), scene.js (art + animation), figures.js, palette.js, quips.js, sound.js, main.js, style.css
 data/          entries.json, status.json, seen.json
