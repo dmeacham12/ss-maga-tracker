@@ -87,5 +87,26 @@
     ],
     "addedBy": "manual",
     "addedAt": "2026-11-06T14:25:35.428Z"
+  },
+  {
+    "id": "eisenberg-2026-11-06",
+    "date": "2026-11-06",
+    "name": "John Eisenberg",
+    "role": "Assistant Attorney General for National Security",
+    "kind": "Resigned",
+    "group": "Administration",
+    "status": "confirmed",
+    "summary": "Assistant Attorney General for National Security Resigns Friday",
+    "sources": [
+      {
+        "name": "politico.com",
+        "url": "https://www.politico.com/news/2026/11/06/john-eisenberg-jason-quinones-doj-01153945"
+      }
+    ],
+    "addedBy": "manual",
+    "addedAt": "2026-11-06T17:44:32.001Z",
+    "figure": "man",
+    "skin": 1,
+    "hair": "bald"
   }
 ]
