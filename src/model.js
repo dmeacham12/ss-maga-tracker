@@ -51,7 +51,11 @@ export function buildTimeline(entries, status, start, now = new Date()) {
 
   const people = jumpers.concat(rumors);
   people.forEach((p, i) => { p.index = i; });
-  return { jumpers, rumors, people, end, today, termDays, endDay };
+  // The clock label never runs past the latest real date: the extra timeline after the last
+  // jump exists only so the splash can finish, not to show a future day.
+  const lastReal = Math.max(today, endDay ?? 0, ...jumpers.map(j => Math.floor(j.d)), 0);
+  const displayEnd = Math.min(end - 0.01, lastReal + 0.99);
+  return { jumpers, rumors, people, end, displayEnd, today, termDays, endDay };
 }
 
 export const SINK_DAYS = 1.4; // length of the final sinking sequence, in timeline days

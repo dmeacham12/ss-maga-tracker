@@ -120,7 +120,7 @@ function buildMarks() {
     s.style.left = (j.d / END * 100) + "%";
     m.append(s);
   }
-  $("end-label").textContent = fmtDay(Math.max(0, END - 0.01), START_DATE);
+  $("end-label").textContent = fmtDay(Math.max(0, tl.displayEnd), START_DATE);
 }
 
 function sourcesRow(e) {
@@ -205,7 +205,7 @@ if (reduce) {
 function draw(sec) {
   if (!tl) return;
   const info = scene.render(t, reduce ? 0 : sec);
-  const dayStr = fmtDay(Math.min(t, END - 0.01), START_DATE);
+  const dayStr = fmtDay(Math.min(t, tl.displayEnd), START_DATE);
   if (dayStr !== lastToday) { lastToday = dayStr; $("today").textContent = dayStr; scrub.setAttribute("aria-valuetext", dayStr); }
   $("t-over").textContent = String(info.overN);
   $("t-wobble").textContent = String(tl.rumors.length);

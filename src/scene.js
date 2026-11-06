@@ -336,25 +336,28 @@ export function createScene(svg, opts = {}) {
   }
 
   // ---------- people ----------
-  function makeTag(label, rumor, denied) {
+  // Name tags only appear once someone is in the water, with punctuation stripped from the name
+  // (apostrophes and hyphens inside a name are kept so names are not mangled).
+  const tagLabel = name => String(name).replace(/[^\p{L}\p{N}\s'’-]/gu, "").replace(/\s+/g, " ").trim();
+  function makeTag(label, denied) {
     const g = sv("g", { opacity: 0 }, tagLayer);
     const rect = sv("rect", { rx: 7, height: 21, style: "fill:var(--tag,#14212b);fill-opacity:.92" }, g);
-    if (rumor) { rect.setAttribute("stroke-dasharray", "3 2"); rect.setAttribute("style", "fill:var(--tag,#14212b);fill-opacity:.92;stroke:var(--tagtext,#fff);stroke-opacity:.7;stroke-width:1"); }
     const txt = sv("text", { y: 14.5, x: 9, "font-size": 12.5, "font-weight": 600, "font-family": FONT, style: "fill:var(--tagtext,#fff)" }, g);
-    txt.textContent = label + (rumor ? " ?" : "");
-    if (denied) { // the official line on a rumor: everything is fine
-      const fine = sv("g", { transform: "translate(6,24) rotate(-2)" }, g);
+    txt.textContent = tagLabel(label);
+    let fine = null;
+    if (denied) { // the official line on a rumor: everything is fine (shown on the deck, without a name)
+      fine = sv("g", { opacity: 0 }, tagLayer);
       sv("rect", { width: 78, height: 14, rx: 2.5, fill: "#ffd25e", stroke: "#5a3b1e", "stroke-width": 1 }, fine);
       const ft = sv("text", { x: 39, y: 10.4, "text-anchor": "middle", "font-size": 8.6, "font-weight": 800, "font-family": FONT, fill: "#5a3b1e" }, fine);
       ft.textContent = "TOTALLY FINE";
     }
-    return { g, rect, txt, w: 80 };
+    return { g, rect, txt, fine, w: 80 };
   }
   function remeasureTags() {
     for (const p of people) {
       let w = 0;
       try { w = p.tag.txt.getComputedTextLength(); } catch (e) { /* not rendered yet */ }
-      if (!w) w = p.e.name.length * 7;
+      if (!w) w = tagLabel(p.e.name).length * 7;
       p.tag.w = w + 18;
       p.tag.rect.setAttribute("width", p.tag.w);
     }
@@ -369,7 +372,7 @@ export function createScene(svg, opts = {}) {
       p.rumor = p.e.status === "rumor";
       p.h = hash(p.e.id);
       p.fig = makeFigure(p.e.id, figLayer, p.e);
-      p.tag = makeTag(p.e.name, p.rumor, p.rumor && p.e.denied);
+      p.tag = makeTag(p.e.name, p.rumor && p.e.denied);
       p.row = i % 3;
       if (p.rumor) { p.slot = FORWARD[ri % FORWARD.length] - Math.floor(ri / FORWARD.length) * 9; ri++; }
       else { p.slot = PROMENADE[ji % PROMENADE.length]; ji++; }
@@ -641,7 +644,7 @@ export function createScene(svg, opts = {}) {
     } else honkWord.setAttribute("opacity", 0);
 
     // figures, tags, splashes
-    let overN = 0, latest = null, splashN = 0, cardN = 0, upcoming = 0;
+    let overN = 0, latest = null, splashN = 0, cardN = 0;
     for (const p of all) {
       const s = stateFor(p, t, sec, world);
       const onScreen = s.x > -90 && s.x < W + 90;
@@ -665,19 +668,19 @@ export function createScene(svg, opts = {}) {
         drawSplash(splashes[splashN++], (t - p.tLand) / SPL, p.wxLand - world, p.landY + 6, p.h, p.style);
       }
       if (p.tag) {
-        let show = false;
-        if (onScreen) {
-          if (p.rumor) show = s.state === "lean" || s.state === "float";
-          else if (s.state === "deck") show = upcoming++ < 5;
-          else show = s.state === "walk" || s.state === "hesitate" || s.state === "climb" || s.state === "float" || s.state === "pop";
-        }
+        const show = onScreen && (s.state === "float" || s.state === "pop");
         if (show) {
-          const inWater = s.state === "float" || s.state === "pop";
-          const top = inWater ? s.y - 58 - p.row * 17 : s.y - (p.rumor ? 52 : 62) * sc - p.row * 17;
+          const top = s.y - 58 - p.row * 17;
           const tx = Math.max(4, Math.min(W - p.tag.w - 4, s.x - p.tag.w / 2));
           p.tag.g.setAttribute("transform", `translate(${tx.toFixed(1)},${top.toFixed(1)})`);
           p.tag.g.setAttribute("opacity", s.state === "pop" ? 0.7 : 1);
         } else p.tag.g.setAttribute("opacity", 0);
+        if (p.tag.fine) {
+          if (onScreen && s.state === "lean") {
+            p.tag.fine.setAttribute("transform", `translate(${(s.x - 39).toFixed(1)},${(s.y - 62 * sc).toFixed(1)}) rotate(-2)`);
+            p.tag.fine.setAttribute("opacity", 1);
+          } else p.tag.fine.setAttribute("opacity", 0);
+        }
       }
     }
     for (let i = splashN; i < splashes.length; i++) splashes[i].g.setAttribute("display", "none");
