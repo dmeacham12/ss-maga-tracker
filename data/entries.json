@@ -72,20 +72,20 @@
     "date": "2026-11-05",
     "name": "Pete Hegseth",
     "role": "Secretary of War",
-    "kind": "Fired",
+    "kind": "Rumored exit",
     "group": "Administration",
     "status": "rumor",
+    "figure": "man",
+    "skin": 2,
+    "hair": "short"
     "summary": "Possible bipartisan impeachment effort expected against Hegseth",
     "sources": [
       {
-        "name": "foxnews.com",
+        "name": "Fox News",
         "url": "https://www.foxnews.com/politics/hegseth-faces-bipartisan-impeachment-threat-after-iran-war-gets-blame-gop-midterm-slaughter#google_vignette"
       }
     ],
     "addedBy": "manual",
     "addedAt": "2026-11-06T14:25:35.428Z",
-    "figure": "man",
-    "skin": 2,
-    "hair": "short"
   }
 ]
