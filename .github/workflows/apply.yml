@@ -1,0 +1,79 @@
+name: apply
+
+# Runs when the repo owner adds `jumped`, `rumor`, `dismiss` or `end-event` to an issue,
+# or opens a Departure issue-form issue. Anyone else's labels are ignored.
+on:
+  issues:
+    types: [labeled, opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: data-writes
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      github.event.sender.login == github.repository_owner && (
+        (github.event.action == 'labeled' && contains(fromJSON('["jumped","rumor","dismiss","end-event"]'), github.event.label.name)) ||
+        (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'departure'))
+      )
+    runs-on: ubuntu-latest
+    outputs:
+      pushed: ${{ steps.commit.outputs.pushed }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply
+        env:
+          LABEL: ${{ github.event.action == 'labeled' && github.event.label.name || 'auto' }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          SENDER: ${{ github.event.sender.login }}
+        run: node scripts/apply.mjs
+      - name: Commit data
+        id: commit
+        run: |
+          if [ -z "$(jq -r '.commit // empty' apply-result.json)" ]; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data
+            git commit -m "$(jq -r '.commit' apply-result.json)"
+            git pull --rebase
+            git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Reply and close
+        env:
+          LABEL: ${{ github.event.action == 'labeled' && github.event.label.name || '' }}
+        run: |
+          result=$(jq -r '.result' apply-result.json)
+          jq -r '.comment // empty' apply-result.json > comment.md
+          if [ "$result" = "ignored" ]; then exit 0; fi
+          if [ -s comment.md ]; then gh issue comment "$NUMBER" --body-file comment.md; fi
+          if [ "$result" = "invalid" ] && [ -n "$LABEL" ]; then
+            # remove the label so adding it again re-runs this workflow
+            gh issue edit "$NUMBER" --remove-label "$LABEL"
+          fi
+          if [ "$(jq -r '.close' apply-result.json)" = "true" ]; then
+            gh issue close "$NUMBER" --reason completed
+          fi
+
+  deploy:
+    needs: apply
+    if: needs.apply.outputs.pushed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml

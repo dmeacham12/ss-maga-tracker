@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SS MAGA: Abandon Ship</title>
+<meta name="description" content="A satirical tracker: every Trump-administration and Republican exit since election night, Nov 3, 2026, played out as one sinking ship.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+<main id="app">
+  <header class="top">
+    <div>
+      <h1>SS MAGA: abandon ship</h1>
+      <p class="lede">Every Trump-administration and Republican exit since election night, Nov 3, 2026, played out as one ship and a lot of splashes.</p>
+    </div>
+    <button type="button" id="theme" class="ghost small" aria-label="Switch color theme">Theme: auto</button>
+  </header>
+
+  <section class="hud" aria-label="Tally">
+    <div class="today" id="today" aria-hidden="true">Nov 3, 2026</div>
+    <dl class="tally">
+      <div><dt>Overboard</dt><dd id="t-over">0</dd></div>
+      <div><dt>Wobbling</dt><dd id="t-wobble">0</dd></div>
+      <div><dt>Days since Nov 3</dt><dd id="t-days">0</dd></div>
+      <div><dt>Waterline</dt><dd id="t-sink">0%</dd></div>
+    </dl>
+  </section>
+
+  <div class="stage">
+    <svg id="scene" class="scene" role="img" aria-label="Animated scene of the ocean liner SS MAGA. People jump overboard into life preservers on the date they left." preserveAspectRatio="xMidYMid slice"></svg>
+    <div id="closing" class="closing" hidden role="status">
+      <div class="card">
+        <p class="eyebrow">She's gone down</p>
+        <h2 id="closing-title">The SS MAGA has sunk</h2>
+        <p id="closing-body"></p>
+        <button type="button" id="replay" class="btn">Watch it again</button>
+      </div>
+    </div>
+  </div>
+
+  <p id="caption" class="caption" aria-live="polite">Election night. Everyone's still aboard.</p>
+
+  <div class="controls">
+    <button type="button" id="play" class="btn">Play</button>
+    <button type="button" id="restart" class="ghost">Restart</button>
+    <div class="track">
+      <input id="scrub" type="range" min="0" max="1" step="0.01" value="0" aria-label="Timeline">
+      <div id="marks" class="marks" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="ends"><span>Nov 3, election night</span><span id="end-label"></span></div>
+
+  <section aria-labelledby="h-over">
+    <h2 id="h-over">Overboard</h2>
+    <p class="sub">Confirmed resignations, firings, removals and step-downs, newest first.</p>
+    <ul id="log-over" class="log"></ul>
+  </section>
+
+  <section aria-labelledby="h-wobble">
+    <h2 id="h-wobble">Wobbling at the rail</h2>
+    <p class="sub">Reported but not confirmed. They stay on deck and aren't counted.</p>
+    <ul id="log-wobble" class="log"></ul>
+  </section>
+
+  <p class="status" id="checked">Last checked for news: …</p>
+  <p class="note">Satire built from public reporting. Figures are generic stand-ins, not likenesses. Dates mark when an exit was announced or reported, and every entry links to its source.</p>
+</main>
+<noscript><p style="padding:16px;font-family:system-ui">This page animates a timeline and needs JavaScript. The list of departures is in <a href="data/entries.json">data/entries.json</a>.</p></noscript>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+name: Departure
+description: Add someone to the ship, or mark a rumor. Works from the GitHub mobile app.
+title: "Departure: "
+labels: ["departure"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      placeholder: Full name
+    validations:
+      required: true
+  - type: input
+    id: role
+    attributes:
+      label: Role
+      placeholder: e.g. Deputy Secretary of Commerce
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: "Format YYYY-MM-DD, on or after 2026-11-03."
+      placeholder: "2026-11-05"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Resigned
+        - Fired
+        - Removed
+        - Stepped down
+        - Retiring
+        - Not seeking re-election
+        - Left the party
+        - Rumored exit
+    validations:
+      required: true
+  - type: dropdown
+    id: group
+    attributes:
+      label: Group
+      options:
+        - Administration
+        - Congress
+        - Party & states
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      description: "confirmed adds them overboard; rumor leaves them wobbling at the rail."
+      options:
+        - confirmed
+        - rumor
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source URL
+      placeholder: https://
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence in your own words. Do not paste headline or article text.
