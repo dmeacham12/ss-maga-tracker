@@ -108,5 +108,26 @@
     "figure": "man",
     "skin": 1,
     "hair": "bald"
+  },
+  {
+    "id": "quin-ones-2026-11-06",
+    "date": "2026-11-06",
+    "name": "Jason A. Reding Quiñones",
+    "role": "U.S. Attorney for the Southern District of Florida",
+    "kind": "Resigned",
+    "group": "Administration",
+    "status": "confirmed",
+    "summary": "U.S. Attorney for the Southern District of Florida Jason A. Reding Quiñones has submitted his resignation.",
+    "sources": [
+      {
+        "name": "nbcnews.com",
+        "url": "https://www.nbcnews.com/politics/justice-department/trump-doj-appointee-led-grand-conspiracy-probe-trump-foes-resigns-rcna607839"
+      }
+    ],
+    "addedBy": "manual",
+    "addedAt": "2026-11-06T17:48:42.798Z",
+    "figure": "man",
+    "skin": 2,
+    "hair": "short"
   }
 ]
