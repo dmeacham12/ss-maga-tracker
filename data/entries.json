@@ -8,6 +8,8 @@
     "group": "Congress",
     "status": "confirmed",
     "figure": "man",
+    "skin": 1,
+    "hair": "short",
     "summary": "Won't run for House GOP leader after the midterm losses, but stays in Congress.",
     "sources": [
       {
@@ -31,6 +33,8 @@
     "group": "Administration",
     "status": "confirmed",
     "figure": "woman",
+    "skin": 2,
+    "hair": "long",
     "summary": "First post-midterm exit from the administration; her resignation was accepted.",
     "sources": [
       {
