@@ -43,7 +43,10 @@ export function buildTimeline(entries, status, start, now = new Date()) {
   const termDays = Math.max(1, dayIndex(status.termEnd, start));
   const endDay = endEventDay(status, start, termDays, today);
 
-  let end = Math.max(today + 0.99, ...jumpers.map(j => j.d + 0.75), 1.5);
+  // A jump needs about 0.9 days to splash and pop up in its preserver, and the judges' scores
+  // stay up for another day, so the timeline must run past the last jump by that much.
+  const JUMP_TAIL = 2.0;
+  let end = Math.max(today + 0.99, ...jumpers.map(j => j.d + JUMP_TAIL), 1.5);
   if (endDay != null) end = Math.max(end, endDay + SINK_DAYS + 0.6);
 
   const people = jumpers.concat(rumors);
