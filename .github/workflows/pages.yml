@@ -31,7 +31,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir _site
-          cp -r index.html config.js src data assets _site/
+          cp -r index.html gallery.html config.js src data assets _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

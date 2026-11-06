@@ -7,6 +7,7 @@
     "kind": "Stepped down",
     "group": "Congress",
     "status": "confirmed",
+    "figure": "man",
     "summary": "Won't run for House GOP leader after the midterm losses, but stays in Congress.",
     "sources": [
       {
@@ -29,6 +30,7 @@
     "kind": "Resigned",
     "group": "Administration",
     "status": "confirmed",
+    "figure": "woman",
     "summary": "First post-midterm exit from the administration; her resignation was accepted.",
     "sources": [
       {
@@ -47,6 +49,7 @@
     "kind": "Rumored exit",
     "group": "Administration",
     "status": "rumor",
+    "figure": "man",
     "denied": true,
     "summary": "One outlet says he is preparing to leave for a 2028 run; the White House and State Department call it baseless.",
     "sources": [
@@ -57,23 +60,5 @@
     ],
     "addedBy": "manual",
     "addedAt": "2026-11-05T18:00:00Z"
-  },
-  {
-    "id": "person-2026-11-05",
-    "date": "2026-11-05",
-    "name": "Test Person",
-    "role": "Test Role",
-    "kind": "Resigned",
-    "group": "Administration",
-    "status": "confirmed",
-    "summary": "",
-    "sources": [
-      {
-        "name": "Fixture News",
-        "url": "https://example.com/fixture/deputy-resigns"
-      }
-    ],
-    "addedBy": "updater",
-    "addedAt": "2026-11-06T02:51:11.781Z"
   }
 ]

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Figure options: SS MAGA</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="src/style.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; margin: 10px 0 28px; }
+  .tile { background: var(--field); border: 1px solid var(--line); border-radius: 12px; padding: 8px 6px 6px; text-align: center; }
+  .tile svg { width: 84px; height: 104px; display: block; margin: 0 auto; }
+  .tile code { font-size: 12px; color: var(--muted); }
+  pre { background: var(--field); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; overflow: auto; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Figure options</h1>
+  <p class="lede">Optional fields you can set on any entry. All figures are generic stand-ins; anything you leave out is picked at random.</p>
+<pre>"figure": "woman" | "man" | "neutral",
+"skin": 1-6,
+"hair": "short" | "long" | "bald" | "bun" | "side" | "bob" | "curly" | "buzz"</pre>
+
+  <h2>Skin tones</h2>
+  <p class="sub">Set <code>skin</code> to 1 (lightest) through 6 (deepest). Shown for each figure type.</p>
+  <div id="skins" class="grid"></div>
+
+  <h2>Hairstyles</h2>
+  <p class="sub">Set <code>hair</code> to override the style. Each figure type also has its own default pool.</p>
+  <div id="hairs" class="grid"></div>
+</main>
+<script type="module">
+import { makeFigure, pose } from "./src/figures.js";
+import { FIGURES, HAIR_STYLES, SKIN_TONE_COUNT } from "./config.js";
+
+const NS = "http://www.w3.org/2000/svg";
+function tile(parent, label, id, opt) {
+  const d = document.createElement("div");
+  d.className = "tile";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "-26 -54 52 64");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", label);
+  d.append(svg);
+  const f = makeFigure(id, svg, opt);
+  pose(f, { x: 0, y: 0, k: 1, dir: 1, armsF: 4, armsB: 4 });
+  const c = document.createElement("code");
+  c.textContent = label;
+  d.append(c);
+  parent.append(d);
+}
+const skins = document.getElementById("skins"), hairs = document.getElementById("hairs");
+for (const figure of FIGURES.filter(f => f !== "neutral")) {
+  for (let s = 1; s <= SKIN_TONE_COUNT; s++) tile(skins, `${figure}, skin ${s}`, `gallery-${figure}-${s}`, { figure, skin: s });
+}
+for (const figure of ["woman", "man"]) {
+  for (const hair of HAIR_STYLES) tile(hairs, `${figure}, ${hair}`, `gallery-${figure}-${hair}`, { figure, skin: 3, hair });
+}
+</script>
+</body>
+</html>
