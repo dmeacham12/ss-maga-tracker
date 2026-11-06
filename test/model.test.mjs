@@ -12,6 +12,8 @@ assert.equal(tl.jumpers.length, 2, "rumors never jump");
 assert.equal(tl.rumors.length, 1);
 assert.equal(dayIndex("2026-11-04", START), 1);
 assert.equal(tl.endDay, null, "no end before term end");
+const lastJump = Math.max(...tl.jumpers.map(j => j.d));
+assert.ok(tl.end >= lastJump + 0.9 + 1e-9, "timeline runs long enough for the last jumper to surface");
 
 let prev = -1;
 for (let t = 0; t <= tl.termDays; t += 10) {
