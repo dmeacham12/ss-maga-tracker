@@ -74,4 +74,10 @@ assert.equal(applyAction({ ...base, label: "end-event", sender: "x", body: "```\
 // malicious markup is data only
 const evil = applyAction({ ...base, body: "```\nname: <img src=x onerror=alert(1)>\ndate: 2026-11-05\nkind: Fired\ngroup: Congress\n```" });
 assert.equal(evil.result, "ok"); // stored as text; the site only ever uses textContent
+// denied rumors and custom quips
+const dr = applyAction({ ...base, label: "rumor", body: "```\nname: Pat Rumor\ndate: 2026-11-06\nkind: Rumored exit\ngroup: Congress\ndenied: yes\nquip: Spotted near the lifeboats.\n```" });
+const pr = dr.entries.find(e => e.name === "Pat Rumor");
+assert.equal(pr.denied, true);
+assert.equal(pr.quip, "Spotted near the lifeboats.");
+assert.equal(read("../data/entries.json").find(e => e.name === "Marco Rubio").denied, true);
 console.log("scripts ok");

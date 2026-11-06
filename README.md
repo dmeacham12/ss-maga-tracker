@@ -38,6 +38,16 @@ Pick whichever is easiest.
 
 Write `summary` yourself. Do not paste headline or article text; the site only shows the outlet name and link.
 
+## The jokes
+
+Everything funny is aimed at the ship and the situation, never at a person. Figures are generic, and which jump style someone gets (swan dive, cannonball, backflip, belly flop, briefcase plunge) and their judges' scores come from a hash of the entry id, so they are pure randomness.
+
+- **Judges' paddles** pop up after each splash, and the closing card shows a final dive scorecard.
+- **The ship coping badly:** a duct-tape patch appears per departure, a "Nothing to see here" sign and bucket-bailers show up after two, the band plays on, and the funnels sputter during the final sinking. Gulls leave first and a shark fin circles at the end.
+- **Caption quips** come from the kind of exit (see [src/quips.js](src/quips.js)). To write your own for one entry, add `"quip": "Your line."` to it in `data/entries.json`.
+- **Denied rumors:** add `"denied": true` to a rumor to pin a "TOTALLY FINE" pennant on it. In a candidate issue block you can add `denied: yes` and `quip: ...` lines.
+- **Extras:** tap the ship (or the Honk button) for a honk, tap a floating figure to make them wave. Sound is off until a visitor turns it on.
+
 ## How the updater works
 
 1. **Scan** ([scan.yml](.github/workflows/scan.yml)) runs every 2 hours. [scripts/scan.mjs](scripts/scan.mjs) reads the feeds in `config.js`, keeps headlines with an exit word and a scope term, skips anything already in `data/seen.json`, groups headlines about the same story, and opens up to 5 issues per run (plus one overflow issue). Each issue is labeled `candidate` and **assigned to you**. It also updates `lastChecked` in `data/status.json`.
@@ -88,7 +98,7 @@ The workflows use only the default `GITHUB_TOKEN`; no other secrets are needed. 
 ```
 index.html
 assets/        favicon
-src/           model.js (timeline + sinking), scene.js (art + animation), figures.js, palette.js, main.js, style.css
+src/           model.js (timeline + sinking), scene.js (art + animation), figures.js, palette.js, quips.js, sound.js, main.js, style.css
 data/          entries.json, status.json, seen.json
 config.js      owner login, feeds, keywords, END_EVENT_TYPES
 scripts/       scan.mjs, apply.mjs, lib.mjs, serve.mjs

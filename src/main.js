@@ -1,6 +1,8 @@
 import { REFRESH_MINUTES, START_DATE } from "../config.js";
 import { buildTimeline, fmtDay, fmtShort, todayIndex, SINK_DAYS } from "./model.js";
-import { createScene, JL } from "./scene.js";
+import { createScene, STYLE_NAMES } from "./scene.js";
+import { quipFor } from "./quips.js";
+import { sound } from "./sound.js";
 
 const $ = id => document.getElementById(id);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -14,7 +16,7 @@ const scene = createScene(svg, { reduce });
 
 let tl = null, status = null, entries = [], END = 1.5;
 let t = 0, playing = false, last = 0, visible = true, dragging = false;
-let lastCapKey = null, lastToday = "", rawKey = "";
+let lastCapKey = null, lastToday = "", rawKey = "", prevT = 0;
 
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const safeUrl = u => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch (e) { return null; } };
@@ -223,9 +225,15 @@ function draw(sec) {
     else if (sinking) cap.textContent = "The SS MAGA is going down. All hands overboard.";
     else if (info.latest) {
       const e = info.latest.e;
-      cap.append(el("strong", null, fmtShort(e.date) + ": " + e.name + " "), document.createTextNode((e.kind || "left").toLowerCase() + ". " + (e.role || "")));
+      cap.append(el("strong", null, fmtShort(e.date) + ": " + e.name + " "), document.createTextNode((e.kind || "left").toLowerCase() + ". " + (e.role || "")), el("span", "quip", quipFor(e)));
     } else cap.textContent = tl.jumpers.length ? "Election night. Everyone's still aboard." : "Everyone's still aboard.";
   }
+  if (playing && t > prevT && t - prevT < 0.25) {
+    let n = 0;
+    for (const l of scene.landings) if (l.t > prevT && l.t <= t && n++ < 2) sound.splash(l.big);
+    if (tl.endDay != null && tl.endDay > prevT && tl.endDay <= t) sound.horn();
+  }
+  prevT = t;
   const closing = $("closing");
   if (closing.hidden === gone) {
     closing.hidden = !gone;
@@ -233,6 +241,7 @@ function draw(sec) {
       const ev = status.endEvent;
       $("closing-title").textContent = "The SS MAGA has sunk";
       $("closing-body").textContent = `Final tally: ${tl.jumpers.length} overboard, ${tl.rumors.length} still wobbling when she went down` + (ev && ev.date ? `, ending ${fmtShort(ev.date)}.` : ".");
+      $("closing-score").textContent = scorecardLine();
     }
   }
 }
@@ -256,6 +265,45 @@ addEventListener("resize", () => {
   draw(performance.now() / 1000);
 });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (tl) { scene.layout(svg.getBoundingClientRect().width || 1000); draw(0); } });
+
+// ---------- the fun bits ----------
+function scorecardLine() {
+  const jumps = tl.jumpers;
+  if (!jumps.length) return "The judges had nothing to score.";
+  const all = jumps.flatMap(j => j.scores);
+  const avg = (all.reduce((a, b) => a + b, 0) / all.length).toFixed(1);
+  const counts = {};
+  for (const j of jumps) counts[j.style.name] = (counts[j.style.name] || 0) + 1;
+  const styles = Object.entries(counts).map(([k, n]) => `${n} ${STYLE_NAMES[k]}${n === 1 ? "" : "s"}`).join(", ");
+  return `Final dive scorecard: judges' average ${avg}. Styles on display: ${styles}.`;
+}
+const funMsg = m => { $("fun-msg").textContent = m; setTimeout(() => { if ($("fun-msg").textContent === m) $("fun-msg").textContent = ""; }, 3500); };
+function honk() {
+  scene.honk(performance.now() / 1000);
+  sound.horn();
+  if (reduce && tl) draw(0);
+}
+$("honk").addEventListener("click", honk);
+scene.ship.addEventListener("click", honk);
+scene.ship.style.cursor = "pointer";
+$("sound").addEventListener("click", () => {
+  const on = !sound.enabled;
+  sound.set(on);
+  $("sound").textContent = "Sound: " + (on ? "on" : "off");
+  $("sound").setAttribute("aria-pressed", String(on));
+  if (on) sound.horn();
+});
+$("share").addEventListener("click", async () => {
+  const n = tl ? tl.jumpers.length : 0;
+  const data = { title: "SS MAGA: Abandon Ship", text: `The SS MAGA: ${n} overboard and counting.`, url: location.href.split("#")[0] };
+  try {
+    if (navigator.share) { await navigator.share(data); return; }
+    await navigator.clipboard.writeText(`${data.text} ${data.url}`);
+    funMsg("Link copied.");
+  } catch (e) {
+    if (e && e.name !== "AbortError") funMsg("Couldn't share from here. Copy the address bar instead.");
+  }
+});
 
 // ---------- boot ----------
 applyTheme();

@@ -85,3 +85,9 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn, .ghost { padding-inline: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .closing { animation: none; } * { scroll-behavior: auto !important; } }
+
+.fun { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.fun-msg { color: var(--muted); font-size: 14px; }
+.quip { display: block; color: var(--muted); font-style: italic; font-size: 16px; margin-top: 2px; }
+.closing .score { color: var(--muted); font-size: 14px; }
+.scene { cursor: default; }

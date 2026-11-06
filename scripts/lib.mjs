@@ -141,7 +141,7 @@ export function buildOverflow(extra) {
 }
 
 // ---------- parsing an issue (candidate block or issue form) ----------
-const FORM_FIELDS = { "name": "name", "role": "role", "date": "date", "kind": "kind", "group": "group", "status": "status", "source url": "sourceUrl", "source name": "sourceName", "summary": "summary", "type": "type" };
+const FORM_FIELDS = { "name": "name", "role": "role", "date": "date", "kind": "kind", "group": "group", "status": "status", "source url": "sourceUrl", "source name": "sourceName", "summary": "summary", "type": "type", "denied": "denied", "quip": "quip" };
 
 export function parseIssue(body) {
   const text = String(body || "").replace(/\r\n/g, "\n");
@@ -158,7 +158,7 @@ export function parseIssue(body) {
     const fence = text.match(/```[a-z]*\n([\s\S]*?)```/);
     const src = fence ? fence[1] : text;
     for (const line of src.split("\n")) {
-      const m = line.match(/^\s*(name|role|date|kind|group|summary|type|status)\s*:\s*(.*)$/i);
+      const m = line.match(/^\s*(name|role|date|kind|group|summary|type|status|denied|quip)\s*:\s*(.*)$/i);
       if (m && m[2].trim()) f[m[1].toLowerCase()] = clean(m[2], 400);
     }
     const s = text.match(/<!--\s*candidate-source:\s*(.*?)\s*\|\s*(\S+)\s*-->/);
@@ -231,6 +231,8 @@ export function applyAction(ctx) {
     let id = base, n = 2;
     while (entries.some(e => e.id === id)) id = `${base}-${n++}`;
     entry = { id, date, name, role: clean(f.role, 160), kind, group, status: wantStatus, summary: clean(f.summary, 300), sources, addedBy: f.candidate ? "updater" : "manual", addedAt: now };
+    if (wantStatus === "rumor" && /^(y|true|1)/i.test(f.denied || "")) entry.denied = true;
+    if (f.quip) entry.quip = clean(f.quip, 140);
     entries.push(entry);
     verb = "added";
   }

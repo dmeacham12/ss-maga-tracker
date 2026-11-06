@@ -25,7 +25,7 @@
   <section class="hud" aria-label="Tally">
     <div class="today" id="today" aria-hidden="true">Nov 3, 2026</div>
     <dl class="tally">
-      <div><dt>Overboard</dt><dd id="t-over">0</dd></div>
+      <div><dt>Life jackets deployed</dt><dd id="t-over">0</dd></div>
       <div><dt>Wobbling</dt><dd id="t-wobble">0</dd></div>
       <div><dt>Days since Nov 3</dt><dd id="t-days">0</dd></div>
       <div><dt>Waterline</dt><dd id="t-sink">0%</dd></div>
@@ -39,6 +39,7 @@
         <p class="eyebrow">She's gone down</p>
         <h2 id="closing-title">The SS MAGA has sunk</h2>
         <p id="closing-body"></p>
+        <p id="closing-score" class="score"></p>
         <button type="button" id="replay" class="btn">Watch it again</button>
       </div>
     </div>
@@ -55,6 +56,13 @@
     </div>
   </div>
   <div class="ends"><span>Nov 3, election night</span><span id="end-label"></span></div>
+
+  <div class="fun" role="group" aria-label="Extras">
+    <button type="button" id="honk" class="ghost small">Honk the horn</button>
+    <button type="button" id="sound" class="ghost small" aria-pressed="false">Sound: off</button>
+    <button type="button" id="share" class="ghost small">Share the ship</button>
+    <span id="fun-msg" class="fun-msg" role="status"></span>
+  </div>
 
   <section aria-labelledby="h-over">
     <h2 id="h-over">Overboard</h2>

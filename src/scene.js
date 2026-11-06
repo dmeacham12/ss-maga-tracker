@@ -28,6 +28,26 @@ const backOut = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow
 const PROMENADE = []; for (let x = -176; x <= 154; x += 22) PROMENADE.push(x);
 const FORWARD = [172, 190, 208, 226];
 const N_EXTRAS = 7;
+const SCORE_DAYS = 1.1;         // how long the judges' paddles stay up after a splash
+
+// Jump styles are picked from a hash of the entry id: pure randomness, nothing about the person.
+const STYLES = [
+  { name: "swan", word: "SWOOSH... plip", scale: 1 },
+  { name: "cannonball", word: "KA-BLOOSH!", scale: 1.45 },
+  { name: "backflip", word: "PLOP!", scale: 1 },
+  { name: "belly", word: "SMACK!", scale: 1.7 },
+  { name: "briefcase", word: "KERPLUNK!", scale: 1.15 },
+];
+export const STYLE_NAMES = { swan: "swan dive", cannonball: "cannonball", backflip: "backflip", belly: "belly flop", briefcase: "briefcase plunge" };
+function flightPose(st, e, sd) {
+  switch (st.name) {
+    case "swan": return { rot: sd * 175 * ease(e), armsF: 96, armsB: 84, legTuck: 0, lean: 0 };
+    case "cannonball": return { rot: sd * 360 * ease(e), armsF: 40, armsB: 36, legTuck: 1.5, lean: 8 };
+    case "backflip": return { rot: -sd * 360 * ease(e), armsF: 150 + Math.sin(e * 20) * 10, armsB: 140, legTuck: 0.7, lean: 0 };
+    case "belly": return { rot: sd * 90 * ease(Math.min(1, e * 2.2)), armsF: 172, armsB: 160, legTuck: 0, lean: 0 };
+    default: return { rot: sd * 358 * ease(e), armsF: 140 + Math.sin(e * 30) * 10, armsB: 120, legTuck: 1, lean: 0, prop: "case" };
+  }
+}
 const FONT = "'Bricolage Grotesque', system-ui, sans-serif";
 
 function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -35,7 +55,8 @@ function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 166452
 export function createScene(svg, opts = {}) {
   const reduce = !!opts.reduce;
   let W = 1000, S = 1, shipX = 600, dark = false, phaseKey = -1, lastPhase = 0;
-  let tl = null, people = [], all = [], windows = [];
+  let tl = null, people = [], all = [], windows = [], landings = [];
+  let bailing = false, lastPatches = -1, lastSign = null, lastSput = null, smokeCol = "#d5dde3", honkAt = null;
   let pal = palette(0, false);
 
   // ---------- defs ----------
@@ -84,6 +105,8 @@ export function createScene(svg, opts = {}) {
   };
   for (let i = 0; i < 5; i++) mkCloud(true, i);
   for (let i = 0; i < 4; i++) mkCloud(false, i);
+  const gulls = [];
+  for (let i = 0; i < 4; i++) gulls.push(sv("path", { fill: "none", "stroke-width": 1.8, "stroke-linecap": "round", "stroke-linejoin": "round" }, svg));
 
   const coast = sv("path", {}, svg);
   const seaRect = sv("rect", { x: 0, y: HORIZON, width: 1000, height: H - HORIZON, fill: "url(#g-sea)" }, svg);
@@ -127,6 +150,7 @@ export function createScene(svg, opts = {}) {
   const shipG = sv("g", {}, svg);
   const shipArt = sv("g", { id: "ship-art" }, shipG);
   const winEls = [];
+  const patchEls = [];
   (function drawShip() {
     const a = shipArt;
     sv("path", { d: HULL, fill: "url(#g-hull)" }, a);
@@ -136,6 +160,16 @@ export function createScene(svg, opts = {}) {
     sv("rect", { x: -230, y: -40, width: 480, height: 1.6, fill: "#ffffff", opacity: 0.6 }, hc);
     sv("rect", { x: -230, y: -50, width: 480, height: 4, fill: "#000", opacity: 0.2 }, hc);
     for (let x = -172; x <= 192; x += 19) winEls.push(sv("circle", { cx: x, cy: -17, r: 2.7 }, hc));
+    // duct-tape patches: one more appears for every departure
+    const pr = rng(31);
+    for (let i = 0; i < 12; i++) {
+      const px = i % 2 === 0 ? -190 + pr() * 120 : 118 + pr() * 80, py = -43 + pr() * 28;
+      const g = sv("g", { display: "none", transform: `translate(${px.toFixed(1)},${py.toFixed(1)}) rotate(${(pr() * 50 - 25).toFixed(0)})` }, hc);
+      sv("rect", { x: -9, y: -5, width: 18, height: 10, rx: 1.2, fill: "#8d939c" }, g);
+      sv("path", { d: "M-9,-5 L9,5 M9,-5 L-9,5", stroke: "#4e545d", "stroke-width": 1.2 }, g);
+      sv("rect", { x: -9, y: -5, width: 18, height: 10, rx: 1.2, fill: "none", stroke: "#c3c8cf", "stroke-width": 0.8, "stroke-dasharray": "3 2" }, g);
+      patchEls.push(g);
+    }
     const nm = sv("text", { x: 22, y: -22, "text-anchor": "middle", fill: "#ffffff", "font-size": 24, "font-weight": 800, "letter-spacing": 5, "font-family": FONT }, a);
     nm.textContent = "SS MAGA";
     sv("rect", { x: -210, y: -53, width: 450, height: 3.2, fill: "#d9c79c" }, a);
@@ -170,23 +204,65 @@ export function createScene(svg, opts = {}) {
   for (let x = -208; x <= 232; x += 11) sv("line", { x1: x, y1: DECK_Y, x2: x, y2: RAIL_Y, stroke: "#f4f6f8", "stroke-width": 1.2, opacity: 0.95 }, railG);
   sv("line", { x1: -208, y1: RAIL_Y, x2: 236, y2: RAIL_Y, stroke: "#f4f6f8", "stroke-width": 2 }, railG);
   sv("line", { x1: -208, y1: -57, x2: 236, y2: -57, stroke: "#f4f6f8", "stroke-width": 1.1, opacity: 0.8 }, railG);
+  const signG = sv("g", { display: "none" }, railG);
+  sv("line", { x1: 92, y1: DECK_Y, x2: 92, y2: -76, stroke: "#5b3d22", "stroke-width": 2.2 }, signG);
+  sv("rect", { x: 54, y: -102, width: 76, height: 27, rx: 2.5, fill: "#ecd9a6", stroke: "#5b3d22", "stroke-width": 1.6 }, signG);
+  [["NOTHING TO", -91], ["SEE HERE", -80]].forEach(([txt, y]) => {
+    const t = sv("text", { x: 92, y, "text-anchor": "middle", "font-size": 9.2, "font-weight": 800, fill: "#5a3b1e", "font-family": FONT }, signG);
+    t.textContent = txt;
+  });
+  // the band plays on, on the roof of the lower deck
+  const bandG = sv("g", {}, railG);
+  [[-132, "#c8423a"], [-124, "#2d5f9a"], [-116, "#e0b43a"]].forEach(([bx, col], i) => {
+    const g = sv("g", { transform: `translate(${bx},-86)` }, bandG);
+    sv("rect", { x: -2.6, y: -9, width: 5.2, height: 9, rx: 1.4, fill: "#1f2a3d" }, g);
+    sv("rect", { x: -2.6, y: -5.6, width: 5.2, height: 1.1, fill: col }, g);
+    sv("circle", { cx: 0, cy: -12, r: 2.7, fill: "#f0cfae" }, g);
+    sv("path", { d: "M-2.8,-13.6 h5.6 v-2 h-5.6 z", fill: col }, g);
+    if (i === 0) sv("path", { d: "M2,-8 l7,-3 l0,5 z", fill: "#e6b93d" }, g);
+    else if (i === 1) sv("ellipse", { cx: 5, cy: -7, rx: 3, ry: 2, fill: "#a8683a" }, g);
+    else sv("rect", { x: 1.8, y: -6, width: 6, height: 4, rx: 1, fill: "#d9d9d9" }, g);
+  });
+  const notes = [0, 1, 2].map(() => { const t = sv("text", { "font-size": 11, "font-weight": 800, "text-anchor": "middle", fill: "#f3c744" }, railG); t.textContent = "\u266a"; return t; });
   const surge = sv("path", { opacity: 0 }, svg);
   const smoke = [];
   for (let i = 0; i < 14; i++) smoke.push(sv("circle", {}, svg));
   const bowSpray = [];
   for (let i = 0; i < 6; i++) bowSpray.push(sv("ellipse", {}, svg));
+  const steam = [];
+  for (let i = 0; i < 6; i++) steam.push(sv("circle", { fill: "#ffffff", opacity: 0 }, svg));
 
   mkWave(WATER + 5, 5, 130, 1.0, "front", 1.6);
   const figFront = sv("g", {}, svg);
   const fxLayer = sv("g", {}, svg);
   const wreck = [0, 1, 2].map(() => sv("ellipse", { fill: "none", "stroke-width": 2, opacity: 0 }, fxLayer));
+  const shark = sv("g", { opacity: 0 }, fxLayer);
+  sv("path", { d: "M-10,0 Q-2,-4 3,-20 Q7,-8 11,0 Z", fill: "#8497a6" }, shark);
+  sv("path", { d: "M-10,0 Q-2,-4 3,-20", fill: "none", stroke: "#d3dee6", "stroke-width": 1.2 }, shark);
+  const sharkWake = sv("ellipse", { cx: 0, cy: 1.5, rx: 18, ry: 3, fill: "none", "stroke-width": 1.4 }, shark);
+  const wordAttrs = { "text-anchor": "middle", "font-weight": 800, "font-family": FONT, stroke: "#0b1b2a", "stroke-width": 4, "paint-order": "stroke", "stroke-linejoin": "round", fill: "#ffd25e" };
+  const honkWord = sv("text", { ...wordAttrs, "font-size": 22, opacity: 0 }, fxLayer);
+  honkWord.textContent = "HOOONK!";
+  const cards = [];
+  for (let i = 0; i < 4; i++) {
+    const g = sv("g", { display: "none" }, fxLayer);
+    const paddles = [0, 1, 2].map(() => {
+      const pg = sv("g", {}, g);
+      sv("line", { x1: 0, y1: 0, x2: 0, y2: 14, stroke: "#7a6f60", "stroke-width": 2 }, pg);
+      sv("rect", { x: -11, y: -24, width: 22, height: 26, rx: 3.5, fill: "#fffdf4", stroke: "#1b2733", "stroke-width": 1.8 }, pg);
+      const t = sv("text", { x: 0, y: -6, "text-anchor": "middle", "font-size": 13, "font-weight": 800, "font-family": FONT, fill: "#1b2733" }, pg);
+      return { pg, t };
+    });
+    cards.push({ g, paddles });
+  }
   const splashes = [];
   for (let i = 0; i < 5; i++) {
     const g = sv("g", { display: "none" }, fxLayer);
     const col = sv("path", {}, g);
     const rip = [0, 1, 2].map(() => sv("ellipse", { fill: "none" }, g));
     const drops = []; for (let j = 0; j < 12; j++) drops.push(sv("circle", {}, g));
-    splashes.push({ g, col, rip, drops });
+    const word = sv("text", { ...wordAttrs, "font-size": 17 }, g);
+    splashes.push({ g, col, rip, drops, word, wordText: "" });
   }
   mkWave(WATER + 64, 8, 210, 1.35, "front2", 1.8);
   mkWave(WATER + 124, 11, 300, 1.8, "front3", 2);
@@ -216,8 +292,11 @@ export function createScene(svg, opts = {}) {
     }
     const winCol = mix("#a8c9dc", "#ffd98a", p.dark), winOp = 0.55 + p.dark * 0.45;
     winEls.forEach(w => { w.setAttribute("fill", winCol); w.setAttribute("opacity", winOp); });
-    const smokeCol = mix("#d5dde3", p.seaDeep, p.dark * 0.7);
+    smokeCol = mix("#d5dde3", p.seaDeep, p.dark * 0.7);
     smoke.forEach(s => s.setAttribute("fill", smokeCol));
+    lastSput = null;
+    gulls.forEach(g => g.setAttribute("stroke", dark ? "#d5deea" : "#34445a"));
+    sharkWake.setAttribute("stroke", p.foam);
     wreck.forEach(w => w.setAttribute("stroke", p.foam));
     splashes.forEach(sp => { sp.col.setAttribute("fill", p.foam); sp.drops.forEach(d => d.setAttribute("fill", p.foam)); sp.rip.forEach(r => r.setAttribute("stroke", p.foam)); });
     wakeFoam.forEach(f => f.setAttribute("fill", p.foam));
@@ -257,12 +336,18 @@ export function createScene(svg, opts = {}) {
   }
 
   // ---------- people ----------
-  function makeTag(label, rumor) {
+  function makeTag(label, rumor, denied) {
     const g = sv("g", { opacity: 0 }, tagLayer);
     const rect = sv("rect", { rx: 7, height: 21, style: "fill:var(--tag,#14212b);fill-opacity:.92" }, g);
     if (rumor) { rect.setAttribute("stroke-dasharray", "3 2"); rect.setAttribute("style", "fill:var(--tag,#14212b);fill-opacity:.92;stroke:var(--tagtext,#fff);stroke-opacity:.7;stroke-width:1"); }
     const txt = sv("text", { y: 14.5, x: 9, "font-size": 12.5, "font-weight": 600, "font-family": FONT, style: "fill:var(--tagtext,#fff)" }, g);
     txt.textContent = label + (rumor ? " ?" : "");
+    if (denied) { // the official line on a rumor: everything is fine
+      const fine = sv("g", { transform: "translate(6,24) rotate(-2)" }, g);
+      sv("rect", { width: 78, height: 14, rx: 2.5, fill: "#ffd25e", stroke: "#5a3b1e", "stroke-width": 1 }, fine);
+      const ft = sv("text", { x: 39, y: 10.4, "text-anchor": "middle", "font-size": 8.6, "font-weight": 800, "font-family": FONT, fill: "#5a3b1e" }, fine);
+      ft.textContent = "TOTALLY FINE";
+    }
     return { g, rect, txt, w: 80 };
   }
   function remeasureTags() {
@@ -284,7 +369,7 @@ export function createScene(svg, opts = {}) {
       p.rumor = p.e.status === "rumor";
       p.h = hash(p.e.id);
       p.fig = makeFigure(p.e.id, figLayer);
-      p.tag = makeTag(p.e.name, p.rumor);
+      p.tag = makeTag(p.e.name, p.rumor, p.rumor && p.e.denied);
       p.row = i % 3;
       if (p.rumor) { p.slot = FORWARD[ri % FORWARD.length] - Math.floor(ri / FORWARD.length) * 9; ri++; }
       else { p.slot = PROMENADE[ji % PROMENADE.length]; ji++; }
@@ -299,6 +384,11 @@ export function createScene(svg, opts = {}) {
     const endDay = tl.endDay;
     all.forEach((p, i) => {
       p.idx = i;
+      p.style = STYLES[(p.h >>> 6) % STYLES.length];
+      p.scores = [0, 1, 2].map(j => Math.round((4.5 + (((p.h >>> (9 + j * 5)) & 31) / 31) * 5) * 2) / 2);
+      p.bailer = !!p.extra && i >= people.length && i < people.length + 2;
+      p.fig.root.style.cursor = "pointer";
+      p.fig.root.addEventListener("click", () => { p.waveUntil = performance.now() / 1000 + 2.4; });
       const confirmed = !p.rumor && !p.extra;
       p.panic = endDay != null && (!confirmed || p.d > endDay - 0.05);
       if (p.panic) {
@@ -313,6 +403,7 @@ export function createScene(svg, opts = {}) {
         p.tLand = p.d + NORMAL.flight1 * JL;
       } else { p.tJ = Infinity; p.tLand = Infinity; }
     });
+    landings = all.filter(p => Number.isFinite(p.tLand)).map(p => ({ t: p.tLand, big: p.style.scale > 1.3 }));
     windows = all.filter(p => Number.isFinite(p.tJ) && !p.extra).map(p => [p.tJ - 0.12, p.tJ + p.jl * 1.2]);
     if (endDay != null) windows.push([endDay - 0.1, endDay + SINK_DAYS + 0.4]);
     remeasureTags();
@@ -336,11 +427,16 @@ export function createScene(svg, opts = {}) {
     const standing = flip => deckAt(p.slot, { dir: flip ? -1 : 1, armsF: 4 + idle * 3, armsB: 4 - idle * 3, lean: idle * 1.2 });
 
     if (p.extra) {
-      if (!p.panic || t < p.tJ) return standing(p.h & 2);
+      if (!p.panic || t < p.tJ) {
+        if (p.bailer && bailing) return deckAt(p.slot, { dir: -1, lean: 16, armsF: 50 + (reduce ? 0 : Math.sin(sec * 5 + p.idx) * 45), armsB: 20, prop: "bucket" });
+        return standing(p.h & 2);
+      }
     } else if (p.rumor) {
       if (!p.panic || t < p.tJ) {
         const lean = 26 + (reduce ? 0 : Math.sin(sec * 0.9 + p.idx) * 4);
-        return deckAt(p.slot, { lean, armsF: 62 + idle * 4, armsB: 52, dir: 1, state: "lean" });
+        const sweat = reduce ? 0.3 : (sec * 0.9 + p.idx * 0.37) % 1;
+        const note = reduce ? 0 : Math.max(0, Math.sin(sec * 1.1 + p.idx * 2.1));
+        return deckAt(p.slot, { lean, armsF: 62 + idle * 4, armsB: 52, dir: 1, state: "lean", sweat, note });
       }
     } else if (!p.panic) {
       const u = (t - p.d) / JL;
@@ -378,14 +474,15 @@ export function createScene(svg, opts = {}) {
       const e = (u - ph.flight0) / (ph.flight1 - ph.flight0);
       const [sx, sy] = pt(startLx, RAIL_Y);
       const arc = 44 + (p.h % 16);
+      const fp = flightPose(p.style, e, sideDir);
       return {
-        x: lerp(sx, tx, e), y: lerp(sy, landY, e) - arc * 4 * e * (1 - e), rot: sideDir * 358 * ease(e), k: sc, dir: sideDir,
-        armsF: 150 + Math.sin(e * 30) * 24, armsB: 130 + Math.cos(e * 26) * 22, legTuck: 1, lean: 0, state: "flight",
+        x: lerp(sx, tx, e), y: lerp(sy, landY, e) - arc * 4 * e * (1 - e), rot: fp.rot, k: sc, dir: sideDir,
+        armsF: fp.armsF, armsB: fp.armsB, legTuck: fp.legTuck, lean: fp.lean, prop: fp.prop, state: "flight",
       };
     }
     if (u < ph.under) {
       const c = (u - ph.flight1) / (ph.under - ph.flight1);
-      return { x: tx, y: landY + 30 * ease(c), rot: 0, k: sc, dir: sideDir, armsF: 150, armsB: 140, legTuck: 0.4, fade: 1 - c, state: "under" };
+      return { x: tx, y: landY + 30 * ease(c), rot: flightPose(p.style, 1, sideDir).rot, k: sc, dir: sideDir, armsF: 150, armsB: 140, legTuck: 0.4, fade: 1 - c, state: "under" };
     }
     const fl = reduce ? 0 : Math.sin(sec * 2 + i) * 2.4;
     if (u < ph.pop) {
@@ -393,7 +490,8 @@ export function createScene(svg, opts = {}) {
       return { x: tx, y: lerp(landY + 28, floatY, backOut(c)) + fl * c, rot: 0, k: sc, dir: -1, ring: c01(c * 1.5), armsF: lerp(150, 28, c), armsB: lerp(140, 22, c), lean: 0, fade: c01(c * 4), state: "pop" };
     }
     const wave = reduce ? 0 : Math.sin(sec * 1.7 + i * 2);
-    return { x: tx, y: floatY + fl, rot: wave * 3, k: sc, dir: -1, ring: 1, armsF: 28 + wave * 9, armsB: 22 - wave * 7, lean: wave * 2.5, state: "float" };
+    const waving = !reduce && p.waveUntil && sec < p.waveUntil;
+    return { x: tx, y: floatY + fl, rot: wave * 3, k: sc, dir: -1, ring: 1, armsF: waving ? 165 + Math.sin(sec * 16) * 18 : 28 + wave * 9, armsB: 22 - wave * 7, lean: wave * 2.5, state: "float" };
   }
 
   function render(t, sec) {
@@ -403,6 +501,11 @@ export function createScene(svg, opts = {}) {
     ang = sk.list + (reduce ? 0 : Math.sin(sec * 1.05) * 0.9);
     off = (reduce ? 0 : Math.sin(sec * 1.4) * 1.8) + sk.level * 46 * sc + ease(c01((fin - 0.3) / 0.7)) * 330 * sc;
     const world = t * PX;
+    let landedN = 0;
+    for (const p of people) if (!p.rumor && t >= p.tLand) landedN++;
+    bailing = landedN >= 2 || sk.wash > 0.1;
+    const honkK = honkAt == null ? 2 : (sec - honkAt) / 0.9;
+    if (honkK >= 0 && honkK < 1) off -= Math.sin(honkK * 12) * (1 - honkK) * 3 * sc;
 
     // lighting across the timeline
     const phase = c01(t / Math.max(tl.end, 1));
@@ -477,7 +580,8 @@ export function createScene(svg, opts = {}) {
       el.setAttribute("cx", (sx - ph * 90 * sc).toFixed(1));
       el.setAttribute("cy", (sy - ph * 34 * sc - (reduce ? 0 : Math.sin(sec + i) * 2)).toFixed(1));
       el.setAttribute("r", ((4 + ph * 14) * sc).toFixed(1));
-      el.setAttribute("opacity", ((1 - ph) * 0.42 * (1 - c01(fin * 2))).toFixed(2));
+      const cough = fin > 0 && fin < 1 ? 0.25 + 0.75 * Math.max(0, Math.sin(sec * 9 + i * 1.3)) : 1;
+      el.setAttribute("opacity", ((1 - ph) * 0.42 * cough * (1 - c01(fin * 1.1))).toFixed(2));
     }
 
     // water washing over the deck
@@ -495,8 +599,49 @@ export function createScene(svg, opts = {}) {
       surge.setAttribute("opacity", (0.55 * sk.wash).toFixed(2));
     } else surge.setAttribute("opacity", 0);
 
+    // gags: patches, sign, band, gulls, shark, honk
+    if (landedN !== lastPatches) { lastPatches = landedN; patchEls.forEach((g, i) => g.setAttribute("display", i < landedN ? "" : "none")); }
+    const showSign = landedN >= 2 || fin > 0;
+    if (showSign !== lastSign) { lastSign = showSign; signG.setAttribute("display", showSign ? "" : "none"); }
+    notes.forEach((n, i) => {
+      const ph = reduce ? 0.3 + i * 0.2 : (sec * 0.6 + i / 3) % 1;
+      n.setAttribute("transform", `translate(${(-122 + Math.sin(ph * 7 + i) * 5 + ph * 8).toFixed(1)},${(-108 - ph * 34).toFixed(1)})`);
+      n.setAttribute("opacity", ((1 - ph) * 0.95).toFixed(2));
+    });
+    const leaveT = tl.endDay != null ? tl.endDay - 0.25 : Infinity;
+    gulls.forEach((g, k) => {
+      const away = t > leaveT ? t - leaveT : 0;
+      const a = reduce ? k * 1.57 : sec * 0.32 + k * 1.57;
+      const f = reduce ? 0.3 : Math.sin(sec * (6 + k) + k);
+      g.setAttribute("d", `M-7,${(2 + f * 3).toFixed(1)} Q-3.5,${(-3 - f * 3).toFixed(1)} 0,0 Q3.5,${(-3 - f * 3).toFixed(1)} 7,${(2 + f * 3).toFixed(1)}`);
+      g.setAttribute("transform", `translate(${(shipX + Math.sin(a) * (190 + k * 45) * sc + away * PX * 3.2).toFixed(1)},${(70 + k * 26 + Math.cos(a * 1.3) * 12 - away * 40).toFixed(1)}) scale(${(0.9 + k * 0.12).toFixed(2)})`);
+      g.setAttribute("opacity", c01(1 - away / 1.2).toFixed(2));
+    });
+    const sharkA = c01((fin - 0.25) / 0.2);
+    shark.setAttribute("opacity", sharkA.toFixed(2));
+    if (sharkA > 0) {
+      const ph = reduce ? 0.7 : sec * 0.42;
+      shark.setAttribute("transform", `translate(${(shipX - 150 * sc + Math.sin(ph) * 190 * sc).toFixed(1)},${(WATER + 34).toFixed(1)}) scale(${(Math.cos(ph) >= 0 ? sc * 1.6 : -sc * 1.6).toFixed(2)},${(sc * 1.6).toFixed(2)})`);
+      sharkWake.setAttribute("rx", (16 + (reduce ? 0 : Math.sin(sec * 3) * 3)).toFixed(1));
+    }
+    const sputter = fin > 0 && fin < 1;
+    if (sputter !== lastSput) { lastSput = sputter; smoke.forEach(sm => sm.setAttribute("fill", sputter ? "#2d3238" : smokeCol)); }
+    for (let i = 0; i < steam.length; i++) {
+      const k = c01((honkK - Math.floor(i / 3) * 0.15) / 0.7);
+      const [sx, sy] = pt(-64 + (i % 3) * 52, -172);
+      const el = steam[i];
+      el.setAttribute("cx", (sx - k * 18 * sc).toFixed(1)); el.setAttribute("cy", (sy - k * 50 * sc).toFixed(1));
+      el.setAttribute("r", ((4 + k * 16) * sc).toFixed(1));
+      el.setAttribute("opacity", honkK >= 0 && honkK < 1.2 && k > 0 ? ((1 - k) * 0.9).toFixed(2) : 0);
+    }
+    if (honkK >= 0 && honkK < 1) {
+      const [hx, hy] = pt(-10, -200);
+      honkWord.setAttribute("transform", `translate(${hx.toFixed(1)},${(hy - honkK * 18).toFixed(1)}) rotate(-4) scale(${backOut(c01(honkK * 4)).toFixed(2)})`);
+      honkWord.setAttribute("opacity", (honkK < 0.75 ? 1 : 1 - (honkK - 0.75) / 0.25).toFixed(2));
+    } else honkWord.setAttribute("opacity", 0);
+
     // figures, tags, splashes
-    let overN = 0, latest = null, splashN = 0, upcoming = 0;
+    let overN = 0, latest = null, splashN = 0, cardN = 0, upcoming = 0;
     for (const p of all) {
       const s = stateFor(p, t, sec, world);
       const onScreen = s.x > -90 && s.x < W + 90;
@@ -512,9 +657,12 @@ export function createScene(svg, opts = {}) {
       if (!p.rumor && !p.extra) {
         if (s.state === "float" || s.state === "pop") overN++;
         if (t >= p.tLand && (!latest || p.tLand >= latest.tLand)) latest = p;
-        if (t >= p.tLand && t < p.tLand + SPL && splashN < splashes.length && onScreen) {
-          drawSplash(splashes[splashN++], (t - p.tLand) / SPL, p.wxLand - world, p.landY + 6, p.h);
+        if (!p.panic && t >= p.tLand + 0.12 && t < p.tLand + 0.12 + SCORE_DAYS && cardN < cards.length && onScreen) {
+          drawCard(cards[cardN++], (t - p.tLand - 0.12) / SCORE_DAYS, p.wxLand - world, p.landY - 72, p.scores);
         }
+      }
+      if (Number.isFinite(p.tLand) && t >= p.tLand && t < p.tLand + SPL && splashN < splashes.length && onScreen) {
+        drawSplash(splashes[splashN++], (t - p.tLand) / SPL, p.wxLand - world, p.landY + 6, p.h, p.style);
       }
       if (p.tag) {
         let show = false;
@@ -533,6 +681,7 @@ export function createScene(svg, opts = {}) {
       }
     }
     for (let i = splashN; i < splashes.length; i++) splashes[i].g.setAttribute("display", "none");
+    for (let i = cardN; i < cards.length; i++) cards[i].g.setAttribute("display", "none");
 
     if (fin > 0.8) {
       const k = c01((fin - 0.8) / 0.2);
@@ -547,9 +696,27 @@ export function createScene(svg, opts = {}) {
     return { overN, latest, sink: sk };
   }
 
-  function drawSplash(sp, s, x, y, h) {
+  function drawCard(cd, s, x, y, scores) {
+    cd.g.setAttribute("display", "");
+    cd.g.setAttribute("transform", `translate(${x.toFixed(1)},${y.toFixed(1)})`);
+    const out = c01((s - 0.8) / 0.2);
+    cd.paddles.forEach((pd, j) => {
+      const k = c01((s - j * 0.07) / 0.14);
+      pd.pg.setAttribute("transform", `translate(${(j - 1) * 28},${(-out * 12 + (1 - backOut(k)) * 20).toFixed(1)}) rotate(${(j - 1) * 6}) scale(${k > 0 ? 1 : 0})`);
+      pd.pg.setAttribute("opacity", (c01(k * 3) * (1 - out)).toFixed(2));
+      const txt = scores[j].toFixed(1);
+      if (pd.t.textContent !== txt) pd.t.textContent = txt;
+    });
+  }
+
+  function drawSplash(sp, s, x, y, h, style) {
+    const k = style.scale;
     sp.g.setAttribute("display", "");
-    sp.g.setAttribute("transform", `translate(${x.toFixed(1)},${y.toFixed(1)})`);
+    sp.g.setAttribute("transform", `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${k})`);
+    if (sp.wordText !== style.word) { sp.wordText = style.word; sp.word.textContent = style.word; }
+    const wk = c01((s - 0.04) / 0.16);
+    sp.word.setAttribute("transform", `translate(0,${((-92 - s * 10) / k).toFixed(1)}) rotate(-5) scale(${(backOut(wk) / k).toFixed(2)})`);
+    sp.word.setAttribute("opacity", (c01(wk * 3) * (1 - c01((s - 0.5) / 0.35))).toFixed(2));
     const rise = c01(s / 0.28);
     const colH = Math.sin(rise * Math.PI) * 30 * (1 - c01((s - 0.2) / 0.3));
     sp.col.setAttribute("d", colH > 1 ? `M-9,2 Q-4,${(-colH * 0.7).toFixed(1)} 0,${(-colH).toFixed(1)} Q4,${(-colH * 0.7).toFixed(1)} 9,2 Z` : "");
@@ -572,5 +739,9 @@ export function createScene(svg, opts = {}) {
 
   function setDark(v) { if (dark !== v) { dark = v; phaseKey = -1; } }
 
-  return { layout, setData, render, setDark, get width() { return W; }, get windows() { return windows; } };
+  return {
+    layout, setData, render, setDark,
+    honk(sec) { honkAt = reduce ? null : sec; },
+    get width() { return W; }, get windows() { return windows; }, get landings() { return landings; }, get ship() { return shipG; },
+  };
 }

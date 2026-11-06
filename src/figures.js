@@ -80,9 +80,17 @@ export function makeFigure(id, parent) {
   const armF = sv("g", {}, upper); // near arm, in front
   sv("rect", { x: -1.7, y: 0, width: 3.4, height: 11, rx: 1.7, fill: L.cloth }, armF);
   sv("circle", { cx: 0, cy: 11.6, r: 2, fill: L.skin }, armF);
+  const caseEl = sv("g", { display: "none" }, armF);
+  sv("rect", { x: -5, y: 11, width: 10, height: 7.5, rx: 1.2, fill: "#7a4a24" }, caseEl);
+  sv("rect", { x: -2, y: 9.4, width: 4, height: 2, rx: 0.8, fill: "none", stroke: "#4a2c12", "stroke-width": 0.9 }, caseEl);
+  sv("rect", { x: -0.6, y: 13.4, width: 1.2, height: 1.6, fill: "#e6c27a" }, caseEl);
+  const bucketEl = sv("path", { d: "M-4.5,11 L4.5,11 L3.4,18 L-3.4,18 Z", fill: "#7d8a96", display: "none" }, armF);
 
   armB.setAttribute("transform", "translate(0,-28)");
   armF.setAttribute("transform", "translate(0,-28)");
+  const sweat = [0, 1].map(() => sv("path", { d: "M0,-3 Q2.2,0 0,1.6 Q-2.2,0 0,-3 Z", fill: "#7fd0ff", display: "none" }, upper));
+  const note = sv("text", { "font-size": 9, "font-weight": 800, fill: "#e8b73a", display: "none" }, upper);
+  note.textContent = "♪";
   const ringFront = sv("g", {}, root);
   const arc = (g, d) => {
     sv("path", { d, fill: "none", stroke: "#ffffff", "stroke-width": 5.4, "stroke-linecap": "butt" }, g);
@@ -92,7 +100,7 @@ export function makeFigure(id, parent) {
   arc(ringBack, "M-14,-13 A14,5.6 0 0 1 14,-13");
   arc(ringFront, "M-14,-13 A14,5.6 0 0 0 14,-13");
   const ring = { back: ringBack, front: ringFront };
-  return { root, body, legs, upper, legL, legR, armB, armF, ring, L };
+  return { root, body, legs, upper, legL, legR, armB, armF, ring, caseEl, bucketEl, sweat, note, L };
 }
 
 /**
@@ -110,6 +118,21 @@ export function pose(f, s) {
   f.upper.setAttribute("transform", `rotate(${(s.lean || 0).toFixed(1)},0,-16)`);
   f.armF.setAttribute("transform", `translate(0,-28) rotate(${(-(s.armsF || 0) + (s.walk ? -sw * 0.5 : 0)).toFixed(1)})`);
   f.armB.setAttribute("transform", `translate(0,-28) rotate(${(-(s.armsB || 0) + (s.walk ? sw * 0.5 : 0)).toFixed(1)})`);
+  f.caseEl.setAttribute("display", s.prop === "case" ? "" : "none");
+  f.bucketEl.setAttribute("display", s.prop === "bucket" ? "" : "none");
+  const sw0 = s.sweat;
+  f.sweat.forEach((d, i) => {
+    if (sw0 == null) { d.setAttribute("display", "none"); return; }
+    const k = (sw0 + i * 0.5) % 1;
+    d.setAttribute("display", "");
+    d.setAttribute("opacity", (1 - k).toFixed(2));
+    d.setAttribute("transform", `translate(${(i ? -8 : 8.4).toFixed(1)},${(-44 + k * 12).toFixed(1)})`);
+  });
+  if (s.note > 0.02) {
+    f.note.setAttribute("display", "");
+    f.note.setAttribute("opacity", s.note.toFixed(2));
+    f.note.setAttribute("transform", `translate(4,${(-44 - s.note * 5).toFixed(1)})`);
+  } else f.note.setAttribute("display", "none");
   const swim = s.ring || 0;
   f.legs.setAttribute("opacity", swim > 0.5 ? 0 : 1);
   for (const g of [f.ring.back, f.ring.front]) {

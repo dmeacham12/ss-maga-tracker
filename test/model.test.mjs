@@ -25,4 +25,8 @@ assert.equal(tlEnd.endDay, 17);
 assert.equal(sinkState(tlEnd.endDay + 5, tlEnd, status, START).level, 1, "fully sunk after end event");
 assert.ok(sinkState(tlEnd.endDay - 0.1, tlEnd, status, START).level < 0.9);
 assert.equal(endEventDay(status, START, tl.termDays, tl.termDays), tl.termDays, "term end triggers sink");
+import { quipFor } from "../src/quips.js";
+assert.ok(quipFor(entries[0]).length > 3, "every kind has a quip");
+assert.equal(quipFor({ id: "x", kind: "Fired", quip: "Custom." }), "Custom.");
+assert.equal(quipFor(entries[0]), quipFor(entries[0]), "quips are stable");
 console.log("model ok");
