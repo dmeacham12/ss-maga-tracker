@@ -54,6 +54,8 @@
     "group": "Administration",
     "status": "rumor",
     "figure": "man",
+    "skin": 2,
+    "hair": "short",
     "denied": true,
     "summary": "One outlet says he is preparing to leave for a 2028 run; the White House and State Department call it baseless.",
     "sources": [
