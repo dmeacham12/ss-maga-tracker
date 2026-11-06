@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Abandon Ship: the 2026 Overboard Timeline</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet"><style id="app-style">
+:root{--page:#e6eef2;--ink:#14212b;--muted:#4a5b68;--line:#c3d1d9;--field:#ffffff;--accent:#c8423a;
+--sky1:#8fd0ec;--sky2:#d8f0f7;--sun:#ffd25e;--cloud:#ffffff;--sea1:#3a8fbb;--sea2:#1f6690;--foam:#e9f7fc;--tag:#14212b;--tagtext:#ffffff;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0d1720;--ink:#e2ebf0;--muted:#94a8b6;--line:#243644;--field:#132230;--accent:#ff6f61;--sky1:#0c1c33;--sky2:#284a6b;--sun:#f1edd2;--cloud:#3b5672;--sea1:#14476a;--sea2:#0b2f4a;--foam:#9cc4dc;--tag:#e2ebf0;--tagtext:#0d1720;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#0d1720;--ink:#e2ebf0;--muted:#94a8b6;--line:#243644;--field:#132230;--accent:#ff6f61;--sky1:#0c1c33;--sky2:#284a6b;--sun:#f1edd2;--cloud:#3b5672;--sea1:#14476a;--sea2:#0b2f4a;--foam:#9cc4dc;--tag:#e2ebf0;--tagtext:#0d1720;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.55 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1040px;margin:0 auto;padding:26px 16px 60px}
+h1{font-size:clamp(30px,6vw,54px);line-height:1;font-weight:800;letter-spacing:-.02em;margin:0}
+.lede{margin:8px 0 18px;color:var(--muted);max-width:60ch}
+.hud{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:10px}
+.today{font-size:clamp(24px,4.4vw,36px);font-weight:800;font-variant-numeric:tabular-nums}
+.tally{display:flex;gap:20px;color:var(--muted)}
+.tally b{color:var(--ink);font-size:22px;font-weight:800;margin-right:4px}
+.scene{width:100%;border-radius:16px;overflow:hidden;display:block;background:var(--sky1)}
+.caption{min-height:3.2em;margin:12px 2px 6px;font-size:18px}
+.caption strong{font-weight:800}
+.controls{display:flex;align-items:center;gap:12px;margin-top:6px}
+.controls button{flex:none;border:0;border-radius:999px;background:var(--ink);color:var(--page);font:600 15px "Bricolage Grotesque",sans-serif;padding:10px 18px;cursor:pointer}
+.controls button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.track{position:relative;flex:1;height:34px}
+.track input{position:absolute;inset:0;width:100%;margin:0;accent-color:var(--accent)}
+.marks{position:absolute;left:8px;right:8px;top:0;height:8px;pointer-events:none}
+.marks span{position:absolute;top:0;width:3px;height:9px;border-radius:2px;background:var(--accent);transform:translateX(-1px)}
+.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin:0 2px}
+h2{font-size:24px;font-weight:800;margin:36px 0 4px}
+.sub{color:var(--muted);margin:0 0 10px}
+.log{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.log li{display:grid;grid-template-columns:82px 1fr auto;gap:14px;align-items:start;padding:14px 2px;border-bottom:1px solid var(--line)}
+.log .d{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.log .n{font-weight:800;font-size:18px;line-height:1.25}
+.log .r{color:var(--muted);font-size:15px}
+.log a{color:var(--ink);text-underline-offset:3px;font-size:14px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.acts button{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:4px 12px;font:500 14px "Bricolage Grotesque",sans-serif;cursor:pointer;white-space:nowrap}
+.acts button:hover{border-color:var(--ink)}
+.owner{display:none!important}
+.can-edit .owner{display:inline-block!important}
+.acts button.armed{color:var(--accent);border-color:var(--accent)}
+.empty{color:var(--muted);padding:14px 2px;border-bottom:1px solid var(--line)}
+.add-btn{margin-top:22px}
+form{display:none;margin-top:14px;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--field)}
+form.open{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:600;color:var(--muted)}
+label.full{grid-column:1/-1}
+input,select{font:400 16px "Bricolage Grotesque",sans-serif;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--page);color:var(--ink)}
+.radios{grid-column:1/-1;display:flex;gap:18px;flex-wrap:wrap;border:0;padding:0;margin:0}
+.radios legend{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.radios label{flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-weight:400;font-size:15px}
+.form-actions{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:999px;background:var(--ink);color:var(--page);font:600 15px "Bricolage Grotesque",sans-serif;padding:10px 18px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.form-msg{color:var(--muted);font-size:14px}
+.note{color:var(--muted);font-size:14px;margin-top:26px;max-width:70ch}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){.log li{grid-template-columns:1fr}.acts{justify-content:flex-start}form.open{grid-template-columns:1fr}.controls button{padding:9px 14px}}
+</style></head>
+<body><main id="root"></main>
+<script type="application/json" id="data">{"entries":[{"id":"e1","date":"2026-11-04","name":"Mike Johnson","role":"House Speaker (R-La.). Told staff he won’t run for minority leader after the GOP lost the House; stays in Congress for now.","kind":"Stepped down","group":"Congress","status":"confirmed","source":"https://www.axios.com/2026/11/04/speaker-mike-johnson-retires-house-republicans-midterms","sourceName":"Axios"},{"id":"e2","date":"2026-11-05","name":"Harmeet Dhillon","role":"Assistant Attorney General, DOJ Civil Rights Division. Resignation accepted by AG Todd Blanche.","kind":"Resigned","group":"Administration","status":"confirmed","source":"https://www.newsweek.com/donald-trump-first-post-midterm-resignation-harmeet-dhillon-exits-12672270","sourceName":"Newsweek"},{"id":"e3","date":"2026-11-05","name":"Marco Rubio","role":"Secretary of State. The Independent reports he’s preparing to leave for a 2028 run; the White House and State Department call it baseless.","kind":"Rumored exit","group":"Administration","status":"rumor","source":"https://jpost.com/american-politics/article-913987","sourceName":"Jerusalem Post"}]}</script>
+<script id="app-script">
+(function(){
+const HEAD='<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Abandon Ship: the 2026 Overboard Timeline</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">';
+const START=new Date(2026,10,3);
+const data=JSON.parse(document.getElementById('data').textContent);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS='http://www.w3.org/2000/svg';
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const PX=120,JUMP=0.45,SPEED=1/2.2,H=440,WATER=300,DECK=WATER-40;
+const COLORS=['#f2a541','#5b8def','#e85d75','#46b39d','#9b6bd3','#f07c3c','#3fa7c9','#d6b13a'];
+let art=null,busy=false,W=1000,shipX=620,t=0,playing=false,lastTs=0,lastCap='';
+
+const parseDate=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const dayIdx=s=>Math.round((parseDate(s)-START)/864e5);
+const fmtDay=n=>{const d=new Date(START);d.setDate(d.getDate()+Math.floor(n));return MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()};
+const fmtShort=s=>{const d=parseDate(s);return MON[d.getMonth()]+' '+d.getDate()};
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function sv(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function safeUrl(u){try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:null}catch(e){return null}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+// timeline model
+const sortedAll=data.entries.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+const jumpers=[],rumors=[];const perDay={};
+sortedAll.forEach(e=>{
+  if(e.status==='rumor'){rumors.push({e});return}
+  const di=dayIdx(e.date);const k=perDay[di]=(perDay[di]||0)+1;
+  jumpers.push({e,d:di+0.2+(k-1)*0.24,k:k-1});
+});
+const todayIdx=Math.round((new Date().setHours(0,0,0,0)-START)/864e5);
+const END=Math.max(todayIdx+0.99,...jumpers.map(j=>j.d+0.75),1.5);
+const people=jumpers.concat(rumors);
+people.forEach((p,i)=>{p.slot=-140+((i*37)%70)+(i>1?(i%2)*6:0);p.color=COLORS[i%COLORS.length]});
+rumors.forEach((p,i)=>{p.slot=70+((i*29)%60)});
+
+// ---------- page ----------
+const root=document.getElementById('root');
+const h1=el('h1',null,'Abandon ship');
+const lede=el('p','lede','Every Trump-administration and Republican exit since election night, Nov 3, 2026, played out as one ship and a lot of splashes.');
+const hud=el('div','hud');const today=el('div','today');today.setAttribute('aria-live','off');
+const tally=el('div','tally');const over=el('span');const deck=el('span');tally.append(over,deck);hud.append(today,tally);
+const svg=sv('svg',{class:'scene',role:'img','aria-label':'Animated ship timeline. People jump overboard on the date they left.'});
+const cap=el('p','caption');cap.setAttribute('aria-live','polite');
+const controls=el('div','controls');
+const playBtn=el('button',null,'Play');playBtn.type='button';
+const restart=el('button','ghost','Restart');restart.type='button';
+const track=el('div','track');const range=el('input');range.type='range';range.min='0';range.max=String(END);range.step='0.01';range.setAttribute('aria-label','Timeline');
+const marks=el('div','marks');jumpers.forEach(j=>{const m=el('span');m.style.left=(j.d/END*100)+'%';marks.append(m)});
+track.append(range,marks);controls.append(playBtn,restart,track);
+const ends=el('div','ends');ends.append(el('span',null,'Nov 3, election night'),el('span',null,fmtDay(END-0.01)));
+
+const h2a=el('h2',null,'Overboard');const subA=el('p','sub','Confirmed resignations, firings, removals and step-downs, in order.');
+const logA=el('ul','log');
+const h2b=el('h2',null,'Wobbling at the rail');const subB=el('p','sub','Reported but not confirmed. They stay on deck and aren’t counted.');
+const logB=el('ul','log');
+function logItem(p,isJ){
+  const e=p.e;const li=el('li');
+  li.append(el('div','d',fmtShort(e.date)));
+  const mid=el('div');mid.append(el('div','n',e.name),el('div','r',(e.kind?e.kind+'. ':'')+(e.role||'')));
+  const u=e.source&&safeUrl(e.source);if(u){const a=el('a',null,e.sourceName||'Source');a.href=u;a.target='_blank';a.rel='noopener noreferrer';mid.append(a)}
+  li.append(mid);
+  const acts=el('div','acts');
+  if(isJ){const b=el('button',null,'Watch the jump');b.type='button';b.onclick=()=>{t=Math.max(0,p.d-0.7);play(true);svg.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})};acts.append(b)}
+  else{const b=el('button','owner','Mark as jumped');b.type='button';b.onclick=()=>{if(busy)return;save({entries:data.entries.map(x=>x.id===e.id?Object.assign({},x,{status:'confirmed',kind:x.kind==='Rumored exit'?'Resigned':x.kind}):x)})};acts.append(b)}
+  const rm=el('button','owner','Remove');rm.type='button';
+  rm.onclick=()=>{if(busy)return;if(!rm.classList.contains('armed')){rm.classList.add('armed');rm.textContent='Confirm remove';setTimeout(()=>{rm.classList.remove('armed');rm.textContent='Remove'},4000);return}save({entries:data.entries.filter(x=>x.id!==e.id)})};
+  acts.append(rm);li.append(acts);return li;
+}
+if(!jumpers.length)logA.append(el('li','empty','Nobody overboard yet.'));
+jumpers.forEach(p=>logA.append(logItem(p,true)));
+if(!rumors.length)logB.append(el('li','empty','Nobody wobbling right now.'));
+rumors.forEach(p=>logB.append(logItem(p,false)));
+
+const addBtn=el('button','btn add-btn owner','Add someone');addBtn.type='button';
+const form=buildForm();
+addBtn.onclick=()=>{form.classList.toggle('open');if(form.classList.contains('open'))form.querySelector('input').focus()};
+const note=el('p','note','Each figure is a placeholder, not a likeness. Dates mark when an exit was announced or reported; every entry links to its source.');
+root.append(h1,lede,hud,svg,cap,controls,ends,h2a,subA,logA,h2b,subB,logB,addBtn,form,note);
+
+// ---------- scene ----------
+const defs=sv('defs',{},svg);
+const sg=sv('linearGradient',{id:'sky',x1:0,y1:0,x2:0,y2:1},defs);sv('stop',{offset:'0','stop-color':'var(--sky1)'},sg);sv('stop',{offset:'1','stop-color':'var(--sky2)'},sg);
+const skyR=sv('rect',{x:0,y:0,height:H,fill:'url(#sky)'},svg);
+const sun=sv('circle',{r:34,cy:80,fill:'var(--sun)'},svg);
+const clouds=[0,1,2,3].map(i=>{const g=sv('g',{fill:'var(--cloud)',opacity:.9},svg);[[0,0,34,14],[26,-8,26,16],[-24,-4,22,12]].forEach(c=>sv('ellipse',{cx:c[0],cy:c[1],rx:c[2],ry:c[3]},g));return {g,x:i*290+80,y:60+(i%2)*46}});
+const backW=sv('path',{fill:'var(--sea1)'},svg);
+const ship=sv('g',{},svg);
+(function drawShip(){
+  sv('path',{d:'M-150,-40 L150,-40 L128,24 L-130,24 Z',fill:'var(--accent)'},ship);
+  sv('rect',{x:-150,y:-46,width:300,height:7,rx:2,fill:'#ffffff'},ship);
+  sv('rect',{x:-72,y:-80,width:132,height:36,rx:5,fill:'#ffffff'},ship);
+  for(let i=0;i<5;i++)sv('circle',{cx:-56+i*26,cy:-62,r:5,fill:'#3a8fbb'},ship);
+  [[-28,'#26313d'],[16,'#26313d']].forEach(f=>{sv('rect',{x:f[0],y:-118,width:22,height:40,rx:2,fill:f[1]},ship);sv('rect',{x:f[0],y:-110,width:22,height:7,fill:'#ffffff'},ship)});
+  sv('line',{x1:-150,y1:-58,x2:-75,y2:-58,stroke:'#ffffff','stroke-width':2.5},ship);
+  sv('line',{x1:62,y1:-58,x2:150,y2:-58,stroke:'#ffffff','stroke-width':2.5},ship);
+  for(let x=-145;x<=150;x+=14){if(x>-75&&x<62)continue;sv('line',{x1:x,y1:-58,x2:x,y2:-46,stroke:'#ffffff','stroke-width':1.5},ship)}
+  const tx=sv('text',{x:50,y:-12,'text-anchor':'middle',fill:'#ffffff','font-size':17,'font-weight':800,'font-family':'Bricolage Grotesque, sans-serif','letter-spacing':'1'},ship);tx.textContent='S.S. 2026';
+  sv('line',{x1:150,y1:-46,x2:150,y2:-140,stroke:'#26313d','stroke-width':3},ship);
+  sv('path',{d:'M150,-140 L186,-130 L150,-120 Z',fill:'#ffd25e'},ship);
+})();
+const smoke=[0,1,2,3,4].map(i=>sv('circle',{r:8,fill:'#cfd8de',opacity:.7},svg));
+const figLayer=sv('g',{},svg);
+const frontW=sv('path',{fill:'var(--sea2)'},svg);
+const fxLayer=sv('g',{},svg);
+const tagLayer=sv('g',{},svg);
+
+function makeFig(p){
+  const g=sv('g',{},figLayer);
+  const ring=sv('g',{},g);
+  sv('circle',{cx:0,cy:-6,r:13,fill:'none',stroke:'#ffffff','stroke-width':6},ring);
+  sv('circle',{cx:0,cy:-6,r:13,fill:'none',stroke:'#e8453c','stroke-width':6,'stroke-dasharray':'10.2 10.2'},ring);
+  const body=sv('g',{},g);
+  sv('rect',{x:-2.5,y:-8,width:2,height:8,rx:1,fill:'#26313d'},body);
+  sv('rect',{x:0.5,y:-8,width:2,height:8,rx:1,fill:'#26313d'},body);
+  sv('rect',{x:-5,y:-20,width:10,height:13,rx:4,fill:p.color},body);
+  sv('circle',{cx:0,cy:-25,r:5.2,fill:'#f2d3b3'},body);
+  const armL=sv('line',{x1:-4,y1:-17,x2:-9,y2:-10,stroke:p.color,'stroke-width':3,'stroke-linecap':'round'},body);
+  const armR=sv('line',{x1:4,y1:-17,x2:9,y2:-10,stroke:p.color,'stroke-width':3,'stroke-linecap':'round'},body);
+  p.g=g;p.ring=ring;p.armL=armL;p.armR=armR;
+  const tag=sv('g',{},tagLayer);const rect=sv('rect',{rx:6,height:22,fill:'var(--tag)'},tag);
+  const txt=sv('text',{y:15,'font-size':13,'font-weight':600,'font-family':'Bricolage Grotesque, sans-serif',fill:'var(--tagtext)'},tag);
+  txt.textContent=p.e.name+(p.e.status==='rumor'?'?':'');
+  p.tag=tag;p.tagRect=rect;p.tagTxt=txt;
+  const spl=sv('g',{},fxLayer);[0,1,2].forEach(i=>sv('circle',{r:4,fill:'none',stroke:'var(--foam)','stroke-width':2.5},spl));
+  [-1,1].forEach(s=>sv('path',{d:'M0,0 Q'+(s*10)+',-20 '+(s*18)+',-6',fill:'none',stroke:'var(--foam)','stroke-width':3,'stroke-linecap':'round'},spl));
+  p.spl=spl;
+}
+people.forEach(makeFig);
+
+function wavePath(phase,amp,len,y0){
+  let d='M'+(-len)+','+H+' L'+(-len)+','+y0;
+  for(let x=-len;x<=W+len;x+=len/2){const up=Math.round((x+len)/(len/2))%2===0;d+=' Q'+(x+len/4)+','+(y0+(up?-amp:amp))+' '+(x+len/2)+','+y0}
+  d+=' L'+(W+len)+','+H+' Z';return {d,len,phase};
+}
+function layout(){
+  const cw=svg.getBoundingClientRect().width||1000;
+  W=cw<640?640:1000;shipX=W*(cw<640?0.66:0.62);
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);skyR.setAttribute('width',W);sun.setAttribute('cx',W*0.15);
+  backW.setAttribute('d',wavePath(0,6,80,WATER-4).d);frontW.setAttribute('d',wavePath(0,7,110,WATER+10).d);
+  people.forEach(p=>{const w=p.tagTxt.getComputedTextLength?p.tagTxt.getComputedTextLength():p.e.name.length*7;p.tagW=w+16;p.tagRect.setAttribute('width',p.tagW);p.tagTxt.setAttribute('x',8)});
+}
+
+function frame(rt){
+  const sec=rt/1000;const bob=reduce?0:Math.sin(sec*1.4)*2.2;const tilt=reduce?0:Math.sin(sec*1.1)*1.2;
+  const world=t*PX;
+  backW.setAttribute('transform','translate('+(-(world*0.6)%80)+','+(reduce?0:Math.sin(sec)*1.5)+')');
+  frontW.setAttribute('transform','translate('+(-(world)%110)+',0)');
+  clouds.forEach(c=>{const span=W+240;let x=((c.x-world*0.25)%span+span)%span-120;c.g.setAttribute('transform','translate('+x+','+c.y+')')});
+  ship.setAttribute('transform','translate('+shipX+','+(WATER+bob)+') rotate('+tilt+')');
+  smoke.forEach((s,i)=>{const ph=((sec*0.5+i/5)%1);const fx=shipX+(i%2?27:-17)-ph*70;s.setAttribute('cx',fx);s.setAttribute('cy',WATER-120+bob-ph*60);s.setAttribute('r',6+ph*12);s.setAttribute('opacity',(reduce?0.5:0.75*(1-ph)).toFixed(2))});
+  let overN=0,latest=null;
+  people.forEach((p,i)=>{
+    const isR=p.e.status==='rumor';
+    let x,y,rot=0,inRing=false,tagOn=false,armUp=false;
+    const pr=isR?-1:(t-p.d)/JUMP;
+    if(pr<=0){x=shipX+p.slot;y=DECK+bob;if(isR){tagOn=true;rot=reduce?0:Math.sin(sec*3+i)*8}if(!isR&&pr>-0.35){armUp=true}}
+    else{
+      const start=p.d*PX+p.slot;const end=start-(p.slot+150)-46-p.k*30;
+      if(pr<1){const wx=start+(end-start)*pr;x=wx-world+shipX;const arc=70+(p.slot+150)*0.35;y=DECK+(WATER+6-DECK)*pr-arc*4*pr*(1-pr);rot=-pr*330;armUp=true}
+      else{x=end-world+shipX;y=WATER+6+(reduce?0:Math.sin(sec*2+i)*2.5);inRing=true;tagOn=true;overN++;latest=p}
+      const sp=pr-1;
+      if(sp>0&&sp<1.4){p.spl.style.display='';const k=sp/1.4;p.spl.setAttribute('transform','translate('+(end-world+shipX)+','+(WATER+6)+')');p.spl.setAttribute('opacity',(1-k).toFixed(2));
+        [...p.spl.querySelectorAll('circle')].forEach((c,j)=>{c.setAttribute('r',4+k*(18+j*12));c.setAttribute('cy',2)})}else p.spl.style.display='none';
+      if(pr>=0.5&&(!latest||latest.d<p.d))latest=p;
+    }
+    if(isR)p.spl.style.display='none';
+    const vis=x>-80&&x<W+80;
+    p.g.style.display=vis?'':'none';
+    p.g.setAttribute('transform','translate('+x+','+y+') rotate('+rot+',0,-14)');
+    p.ring.style.display=inRing?'':'none';
+    p.armL.setAttribute('y2',armUp?-27:-10);p.armR.setAttribute('y2',armUp?-27:-10);
+    p.tag.style.display=tagOn&&vis?'':'none';
+    if(tagOn){const ty=(isR?DECK-58-(i%2)*24:WATER-64-(i%3)*26)+(isR?bob:0);p.tag.setAttribute('transform','translate('+Math.min(x-p.tagW/2,W-p.tagW-4)+','+ty+')')}
+  });
+  today.textContent=fmtDay(Math.min(t,END-0.01));
+  over.replaceChildren(el('b',null,String(overN)),document.createTextNode('overboard'));
+  deck.replaceChildren(el('b',null,String(rumors.length)),document.createTextNode('wobbling'));
+  const key=latest?latest.e.id:'none';
+  if(key!==lastCap){lastCap=key;cap.replaceChildren();
+    if(latest){const e=latest.e;cap.append(el('strong',null,fmtShort(e.date)+': '+e.name+' '),document.createTextNode((e.kind||'left').toLowerCase()+'. '+(e.role||'')))}
+    else cap.textContent=jumpers.length?'Election night. Everyone’s still aboard.':'Everyone’s still aboard.'}
+  range.value=String(t);
+}
+
+function loop(ts){
+  if(playing){if(lastTs){t+= (ts-lastTs)/1000*SPEED}if(t>=END){t=END;playing=false;playBtn.textContent='Play'}}
+  lastTs=ts;frame(ts);requestAnimationFrame(loop);
+}
+function play(on){playing=on;if(on&&t>=END-0.01)t=0;playBtn.textContent=on?'Pause':'Play'}
+playBtn.onclick=()=>play(!playing);
+restart.onclick=()=>{t=0;play(true)};
+range.addEventListener('input',()=>{t=parseFloat(range.value);play(false)});
+addEventListener('resize',layout);
+
+layout();
+if(reduce){t=END}else{t=0;setTimeout(()=>play(true),700)}
+requestAnimationFrame(loop);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layout);
+
+// ---------- editing ----------
+function buildForm(){
+  const f=el('form');f.setAttribute('aria-label','Add someone');
+  const d=new Date();const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  f.innerHTML='<label>Name<input name="name" required maxlength="60" autocomplete="off"></label>'+
+  '<label>Date<input name="date" type="date" required min="2026-11-03" value="'+iso+'"></label>'+
+  '<label class="full">Post and details<input name="role" maxlength="220" placeholder="e.g. Deputy Secretary of Commerce. Leaving at month’s end."></label>'+
+  '<label>Type of exit<select name="kind"><option>Resigned</option><option>Fired</option><option>Removed</option><option>Stepped down</option><option>Retiring</option><option>Not seeking re-election</option><option>Left the party</option><option>Rumored exit</option><option>Other</option></select></label>'+
+  '<label>Group<select name="group"><option>Administration</option><option>Congress</option><option>Party &amp; states</option></select></label>'+
+  '<label>Source link<input name="source" type="url" placeholder="https://"></label>'+
+  '<label>Source name<input name="sourceName" maxlength="40" placeholder="e.g. AP"></label>'+
+  '<fieldset class="radios"><legend>Status</legend><label><input type="radio" name="status" value="confirmed" checked> Jumped (confirmed)</label><label><input type="radio" name="status" value="rumor"> Wobbling (rumor)</label></fieldset>'+
+  '<div class="form-actions"><button class="btn" type="submit">Add to the ship</button><button class="btn ghost" type="button" data-cancel>Cancel</button><span class="form-msg" role="status"></span></div>';
+  f.querySelector('[data-cancel]').onclick=()=>f.classList.remove('open');
+  f.addEventListener('submit',ev=>{
+    ev.preventDefault();if(busy)return;
+    const fd=new FormData(f);const msg=f.querySelector('.form-msg');
+    const name=(fd.get('name')||'').trim();if(!name){msg.textContent='Add a name first.';return}
+    const src=(fd.get('source')||'').trim();if(src&&!safeUrl(src)){msg.textContent='Source link needs to start with https://';return}
+    const entry={id:'e'+Date.now(),date:fd.get('date'),name,role:(fd.get('role')||'').trim(),kind:fd.get('kind'),group:fd.get('group'),status:fd.get('status'),source:src,sourceName:(fd.get('sourceName')||'').trim()};
+    msg.textContent='Adding…';save({entries:data.entries.concat(entry)},msg);
+  });
+  return f;
+}
+function buildDoc(next){
+  const css=document.getElementById('app-style').textContent;
+  const js=document.getElementById('app-script').textContent;
+  const json=JSON.stringify(next).replace(/</g,'\\u003c');
+  return '<!doctype html>\n<html lang="en">\n<head>'+HEAD+'<style id="app-style">'+css+'</style></head>\n<body><main id="root"></main>\n<script type="application/json" id="data">'+json+'<\/script>\n<script id="app-script">'+js+'<\/script>\n</body>\n</html>\n';
+}
+async function save(next,msg){
+  if(!art)return;busy=true;
+  try{await art.publish(buildDoc(next))}
+  catch(e){busy=false;const code=e&&e.code;if(code==='conflict')return;
+    if(['not_writer','not_granted','not_declared','consent_required','capability_disabled','capability_removed'].includes(code)){document.body.classList.remove('can-edit');if(msg)msg.textContent='This view is read-only.';return}
+    if(msg)msg.textContent=code==='rate_limited'?'Saving too often. Wait a moment, then try again.':'Couldn’t save. Try again in a moment.'}
+}
+if(window.claude&&window.claude.use){window.claude.use('artifact').then(a=>{if(a){art=a;document.body.classList.add('can-edit')}}).catch(()=>{})}
+})();
+</script>
+</body>
+</html>
