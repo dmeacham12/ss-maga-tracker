@@ -129,5 +129,26 @@
     "figure": "man",
     "skin": 2,
     "hair": "short"
+  },
+  {
+    "id": "wiles-2026-11-06",
+    "date": "2026-11-06",
+    "name": "Susie Wiles",
+    "role": "White House Chief of Staff",
+    "kind": "Removed",
+    "group": "Administration",
+    "status": "confirmed",
+    "summary": "Stephen Miller will replaces Susie Wiles as White House chief of staff",
+    "sources": [
+      {
+        "name": "politico.com",
+        "url": "https://www.politico.com/news/2026/11/06/susie-wiles-stephen-miller-trump-chief-of-staff-01154493"
+      }
+    ],
+    "addedBy": "manual",
+    "addedAt": "2026-11-06T19:19:22.158Z",
+    "figure": "woman",
+    "skin": 1,
+    "hair": "bob"
   }
 ]
