@@ -77,7 +77,7 @@
     "status": "rumor",
     "figure": "man",
     "skin": 2,
-    "hair": "short"
+    "hair": "short",
     "summary": "Possible bipartisan impeachment effort expected against Hegseth",
     "sources": [
       {
@@ -86,6 +86,6 @@
       }
     ],
     "addedBy": "manual",
-    "addedAt": "2026-11-06T14:25:35.428Z",
+    "addedAt": "2026-11-06T14:25:35.428Z"
   }
 ]

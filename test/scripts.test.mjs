@@ -21,6 +21,7 @@ assert.equal(normalizeTitle("Big news - Outlet"), "big news");
 const issue = buildIssue(cluster([items[0]])[0], entries);
 assert.ok(issue.title.length <= 80);
 let body = issue.body.replace("name: ", "name: Pat Example").replace("role:", "role: Deputy Chief of Staff").replace("summary:", "summary: Left after one week.");
+const entryCount = entries.length;
 const base = { label: "jumped", body, sender: OWNER_LOGIN, entries, status, issueUrl: "https://github.com/x/y/issues/1", now: "2026-11-05T20:00:00Z" };
 
 let r = applyAction(base);
@@ -31,7 +32,7 @@ assert.equal(pat.status, "confirmed");
 assert.equal(pat.id, "example-2026-11-05");
 assert.equal(pat.addedBy, "updater");
 assert.equal(pat.sources[0].url, "https://example.com/fixture/deputy-resigns");
-assert.equal(entries.length, 3, "input not mutated");
+assert.equal(entries.length, entryCount, "input not mutated");
 
 // others cannot act
 assert.equal(applyAction({ ...base, sender: "someone-else" }).result, "ignored");

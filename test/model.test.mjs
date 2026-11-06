@@ -8,8 +8,10 @@ const START = "2026-11-03";
 const now = new Date(2026, 10, 5, 12);
 
 const tl = buildTimeline(entries, status, START, now);
-assert.equal(tl.jumpers.length, 2, "rumors never jump");
-assert.equal(tl.rumors.length, 1);
+const confirmedN = entries.filter(e => e.status === "confirmed" && e.date <= "2026-11-05").length;
+const rumorN = entries.filter(e => e.status === "rumor").length;
+assert.equal(tl.jumpers.length, confirmedN, "rumors never jump");
+assert.equal(tl.rumors.length, rumorN);
 assert.equal(dayIndex("2026-11-04", START), 1);
 assert.equal(tl.endDay, null, "no end before term end");
 assert.ok(tl.displayEnd < tl.end && tl.displayEnd <= 2.99 + 1e-9, "date label stops at the latest real day");
