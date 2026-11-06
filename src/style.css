@@ -1,0 +1,93 @@
+:root {
+  --page: #e8eff3; --ink: #14212b; --muted: #475a68; --line: #c3d1d9; --field: #ffffff; --accent: #c8423a;
+  --tag: #14212b; --tagtext: #ffffff; --card: #ffffffee;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0b141c; --ink: #e2ebf0; --muted: #9db0be; --line: #243644; --field: #132230; --accent: #ff6f61;
+    --tag: #e2ebf0; --tagtext: #0b141c; --card: #0f1c28ee; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0b141c; --ink: #e2ebf0; --muted: #9db0be; --line: #243644; --field: #132230; --accent: #ff6f61;
+  --tag: #e2ebf0; --tagtext: #0b141c; --card: #0f1c28ee; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font: 400 16px/1.55 "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+main { max-width: 1060px; margin: 0 auto; padding: 22px 16px 60px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+h1 { font-size: clamp(30px, 6vw, 54px); line-height: 1; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+.lede { margin: 8px 0 16px; color: var(--muted); max-width: 62ch; }
+h2 { font-size: 24px; font-weight: 800; margin: 0 0 4px; }
+section { margin-top: 36px; }
+.sub { color: var(--muted); margin: 0 0 10px; }
+
+.hud { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin: 4px 0 10px; }
+.today { font-size: clamp(24px, 4.4vw, 36px); font-weight: 800; font-variant-numeric: tabular-nums; }
+.tally { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; }
+.tally div { display: flex; align-items: baseline; gap: 6px; }
+.tally dt { color: var(--muted); order: 2; font-size: 14px; }
+.tally dd { margin: 0; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.stage { position: relative; border-radius: 18px; overflow: hidden; background: #0b1c33; box-shadow: 0 10px 34px #00000030; }
+.scene { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 520; }
+@media (max-width: 559px) { .scene { aspect-ratio: 620 / 520; } }
+.closing {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 16px;
+  background: #02081466; backdrop-filter: blur(2px); animation: fade 0.9s both;
+}
+.closing[hidden] { display: none; }
+.closing .card { max-width: 440px; padding: 22px 24px; border-radius: 16px; background: var(--card); text-align: center; }
+.closing h2 { font-size: 28px; }
+.closing p { margin: 8px 0; }
+.eyebrow { color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; margin: 0; }
+@keyframes fade { from { opacity: 0; } }
+
+.caption { min-height: 3.3em; margin: 12px 2px 6px; font-size: 18px; }
+.caption strong { font-weight: 800; }
+.controls { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+button { font: 600 15px "Bricolage Grotesque", system-ui, sans-serif; cursor: pointer; }
+.btn { border: 0; border-radius: 999px; background: var(--ink); color: var(--page); padding: 10px 20px; min-height: 44px; }
+.ghost { border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); padding: 10px 16px; min-height: 44px; }
+.ghost.small { min-height: 36px; padding: 6px 12px; font-size: 13px; white-space: nowrap; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.track { position: relative; flex: 1; height: 44px; }
+.track input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; accent-color: var(--accent); background: transparent; }
+.marks { position: absolute; left: 9px; right: 9px; top: 4px; height: 9px; pointer-events: none; }
+.marks span { position: absolute; top: 0; width: 3px; height: 10px; border-radius: 2px; background: var(--accent); transform: translateX(-1px); }
+.ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin: 0 2px; }
+
+.log { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.log li { display: grid; grid-template-columns: 82px 1fr auto; gap: 14px; align-items: start; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+.log .d { font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.log .n { font-weight: 800; font-size: 18px; line-height: 1.25; }
+.log .r { color: var(--muted); font-size: 15px; }
+.log .s { margin-top: 2px; }
+.log .src { font-size: 14px; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.log a { color: var(--ink); text-underline-offset: 3px; }
+.badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); margin-left: 6px; vertical-align: 2px; }
+.acts button { border: 1px solid var(--line); background: none; color: var(--ink); border-radius: 999px; padding: 6px 14px; min-height: 40px; font-weight: 500; font-size: 14px; white-space: nowrap; }
+.acts button:hover { border-color: var(--ink); }
+.empty { color: var(--muted); padding: 14px 2px; display: block !important; }
+.status { color: var(--muted); font-size: 14px; margin: 30px 0 0; }
+.note { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 72ch; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .log li { grid-template-columns: 1fr; gap: 6px; }
+  .top { flex-direction: column; }
+  .controls { gap: 8px; }
+  .btn, .ghost { padding-inline: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .closing { animation: none; } * { scroll-behavior: auto !important; } }
+
+.fun { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.fun-msg { color: var(--muted); font-size: 14px; }
+.quip { display: block; color: var(--muted); font-style: italic; font-size: 16px; margin-top: 2px; }
+.closing .score { color: var(--muted); font-size: 14px; }
+.scene { cursor: default; }
