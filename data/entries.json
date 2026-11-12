@@ -150,5 +150,26 @@
     "figure": "woman",
     "skin": 1,
     "hair": "bob"
+  },
+  {
+    "id": "bauer-2026-11-11",
+    "date": "2026-11-11",
+    "name": "Meghan Bauer",
+    "role": "White House Cabinet Secretary",
+    "kind": "Resigned",
+    "group": "Administration",
+    "status": "confirmed",
+    "summary": "White House Cabinet Secretary Resigns",
+    "sources": [
+      {
+        "name": "NewsBytes",
+        "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxPYjBGSzRuSHBVNlEzbmR0LXRKOEREYzN5R0hwU0tMZTczc09CTE4xcEtnT3M0U05RaUNKYnVRQXV5LVVBTGxVRV8zNFkzUUNSRFQ0MlcwdWI2M3pDOC1PQVFLQlc1ZkdYYk1rbjdKMDZEUUJlSFZvSVlQM2EwZjh6c2s0NVgyejEwSl9JdmpZNnpRdVJZY1MtVlljaDcxV1cwVkhtblRnSzU0TU5uMi1BZVhWbw?oc=5"
+      }
+    ],
+    "addedBy": "updater",
+    "addedAt": "2026-11-12T16:13:07.535Z",
+    "figure": "woman",
+    "skin": 1,
+    "hair": "long"
   }
 ]
