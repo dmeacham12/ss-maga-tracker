@@ -171,5 +171,26 @@
     "figure": "woman",
     "skin": 1,
     "hair": "long"
+  },
+  {
+    "id": "shumate-2026-11-09",
+    "date": "2026-11-09",
+    "name": "Brett Shumate",
+    "role": "Assistant Attorney General of the Civil Division",
+    "kind": "Resigned",
+    "group": "Administration",
+    "status": "confirmed",
+    "summary": "Assistant Attorney General of the Civil Division Resigns",
+    "sources": [
+      {
+        "name": "cbsnews.com",
+        "url": "https://www.cbsnews.com/news/top-lawyer-justice-department-civil-division-brett-shumate-resigns/"
+      }
+    ],
+    "addedBy": "manual",
+    "addedAt": "2026-11-12T16:20:36.794Z",
+    "figure": "man",
+    "skin": 1,
+    "hair": "short"
   }
 ]
